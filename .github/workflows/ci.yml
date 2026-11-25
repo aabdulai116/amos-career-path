@@ -51,7 +51,9 @@ jobs:
     name: Resource links
     runs-on: ubuntu-latest
     # Hits other people's servers, so it runs on main rather than on every
-    # push to a branch, and a flaky network does not fail a pull request.
+    # push to a branch. Still allowed to fail the job without failing the
+    # run: some sites refuse datacenter IPs outright, which says nothing
+    # about whether the link works for a person.
     if: github.event_name == 'push'
     continue-on-error: true
     steps:

@@ -138,11 +138,22 @@ const youTubePageFallback = async (
           note: `embedding disabled (oEmbed ${oembedStatus}); video plays on YouTube`,
         };
       }
+      // LOGIN_REQUIRED and AGE_VERIFICATION_REQUIRED mean "this network is
+      // being asked to sign in", not "this video is gone". YouTube serves
+      // that wall to datacenter IPs, so every CI run saw it and the job
+      // failed on links that are demonstrably fine from a browser. A check
+      // that always fails is a check people learn to ignore, so it is
+      // reported as needing a human rather than as dead.
+      const needsAHuman =
+        playability[1] === "LOGIN_REQUIRED" ||
+        playability[1] === "AGE_VERIFICATION_REQUIRED";
       return {
-        verdict: "dead",
+        verdict: needsAHuman ? "warn" : "dead",
         method,
         status: "200",
-        note: `playabilityStatus ${playability[1]}`,
+        note: needsAHuman
+          ? `${playability[1]} - YouTube is gating this network, not the video; open it yourself`
+          : `playabilityStatus ${playability[1]}`,
       };
     }
     if (url.includes("/playlist?") && body.includes('"playlistId"')) {

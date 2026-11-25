@@ -754,3 +754,16 @@ plain words, and specific: what is stored, what is not, who can see it, and
 that I could technically query the database because I host it. The audience is
 a first-year deciding whether to sign in with their university account, and
 nobody has ever been reassured by boilerplate.
+
+### Phase 14, addendum — the first CI run
+
+The first run went green overall and the link job inside it failed, which is
+exactly the combination that teaches someone to stop reading CI.
+
+It was not dead links. YouTube answers GitHub's datacenter IPs with a consent
+wall, so three videos came back `playabilityStatus LOGIN_REQUIRED` in CI and
+200-with-OK from a laptop minutes earlier. The checker was calling that dead.
+`LOGIN_REQUIRED` means "this network is being asked to sign in", not "this
+video is gone", so it is now reported as needing a human, alongside the sites
+that refuse automated requests outright. A check that always fails is worse
+than no check.
