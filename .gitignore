@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# C++ engine build output (the wasm artifact IS committed; see DECISIONS.md)
+engine/build/
