@@ -170,7 +170,7 @@ export function OrderBookLab() {
   );
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5 px-5 py-6">
+    <div className="space-y-5">
       <header>
         <p className="flex items-center gap-1.5 font-mono text-[11px] tracking-widest text-[var(--muted)] uppercase">
           <Cpu className="size-3.5" aria-hidden />
