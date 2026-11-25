@@ -168,3 +168,38 @@ to keep the rest statically rendered.
 
 **The path chips appear on both pages** and write to the same persisted setting,
 so changing the path on the dashboard changes what the Atlas highlights.
+
+## Phase 4 — Notes, settings, export and import
+
+**Notes render through a hand-written markdown subset, not a library.**
+`src/lib/markdown.ts` parses to a tree of plain objects and `<Markdown>` turns
+that into React elements. Nothing ever becomes an HTML string, so there is no
+`dangerouslySetInnerHTML` and no injection surface — worth more for notes than
+full CommonMark coverage. Supported: `#`/`##`/`###`, `-` and `1.` lists, `>`
+quotes, ``` fences, `---`, `**bold**`, `*italic*`, `` `code` `` and links.
+
+**Link hrefs are filtered at parse time.**
+Only `http:`, `https:`, `mailto:` and in-app absolute paths survive; anything
+else — `javascript:`, `data:`, protocol-relative `//host` — stays literal text.
+Tested directly, because this is the one place a note could do damage.
+
+**Notes have Write and Preview tabs** rather than a live split pane. The panel is
+26rem wide; two columns there would make both unreadable.
+
+**Import replaces, it never merges.**
+Merging two progress files raises questions with no good answer — whose
+`completedAt` wins, do hours add up. Replacing is predictable, and the UI says so
+before you pick a file. A file that fails validation changes nothing at all,
+which is covered by a test.
+
+**Reset confirms inline, not with `window.confirm`.**
+The inline prompt names what is about to go ("Delete 12 skills and 30 logged
+days?"), which a browser dialog cannot do, and it matches the rest of the UI.
+
+**The recruiting date only commits when it parses.**
+`isValidDayKey` lives in `src/lib/dates.ts` and is tested; a half-typed date in
+the picker never reaches the store, so the countdown cannot show `NaN`.
+
+**Export is a plain download of exactly what is in storage**, pretty-printed and
+named with today's date. A round-trip test takes a populated store through
+`exportState` → JSON → `importState` and asserts every field survives.
