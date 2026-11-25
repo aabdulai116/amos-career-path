@@ -229,3 +229,35 @@ boxes undersells the thing.
 opens the panel, focus moves into it, Escape closes it and focus returns to the
 node it came from. The search box is the other way in — `/` focuses it, arrows
 move through results, Enter jumps.
+
+## Phase 6 — 100 Days of Code tracker
+
+**Structure only, never the content.**
+`src/data/course.ts` holds section titles, lecture counts and run times — facts
+about the course, the same things Udemy's own public curriculum page shows. None
+of Dr. Angela Yu's lectures, transcripts or exercises are reproduced. The flow is:
+watch on Udemy, come back, record the day. The transcribed run times sum to 57
+hours, which matches the figure Udemy advertises — a useful check that the
+transcription is right, and a test asserts it.
+
+**Every day carries a practice project of my own.**
+Deliberately *different* from the course's build for that day: day 7 is Hangman
+in the course, so the practice build is a category word-guess; day 22 is Pong, so
+the practice build is Breakout. Same skill, second rep, and a repo link field so
+each one can become a proof-of-work entry. The later portfolio days point at
+things this platform or the quant track actually needs — an order book viewer, a
+market-making game, a multi-board job poller.
+
+**Marking a day watched does not log hours.**
+It credits the streak, but watch speed is mine to know — a 1hr 12min section at
+1.5x is 48 minutes. The day's run time is shown and hours stay a deliberate entry
+on the skill side.
+
+**Lecture deep links are pasted, not generated.**
+Udemy lecture URLs carry opaque ids that cannot be derived from a section number.
+Each day has a field to save its link the first time you open it; until then the
+button goes to the course page.
+
+**`course` was added to the persisted state without a version bump.**
+`parseProgressState` defaults it to `{}`, so a JSON file exported before this
+phase still imports cleanly.
