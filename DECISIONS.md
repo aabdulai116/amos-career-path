@@ -74,3 +74,52 @@ not want to merge into vaguer nodes.
 **Added `Monte Carlo & Numerical Methods` to the Quant domain** beyond the listed
 fourteen, because one of the seeded resources (Quant Guild Library) covers Itô
 calculus *and* Monte Carlo, and it had nowhere sensible to attach.
+
+## Phase 2 — Atlas
+
+**Layout: dagre for x, domain bands for y.**
+dagre with `rankdir: "LR"` decides horizontal position, so a skill always sits to
+the right of everything it depends on. Left on its own, dagre interleaves the
+domains and the map becomes unreadable, so vertical position is reassigned into
+one band per domain, in the order domains are declared. Inside a band, nodes are
+greedily packed into the fewest rows where none overlap horizontally.
+
+**Filters dim, they never hide.**
+Domain chips, path chips and search all narrow the same way: matching skills stay
+at full strength and everything else drops to 22% opacity. Hiding nodes would make
+the map's shape change under me every time I typed, and dangle the edges that
+cross into a hidden domain. Domain and path filters intersect, they do not union.
+
+**Nodes declare `width` and `height` instead of being measured.**
+React Flow otherwise measures them on a second pass, which both shifts the first
+paint and — less obviously — makes the minimap draw nothing at all, because it
+only renders nodes that already have dimensions.
+
+**`skipHydration` plus an explicit `useHydrateProgress()` hook.**
+Zustand's persist middleware normally reads localStorage at import time, which
+makes the first client render disagree with the server's. The store now skips
+that and a hook rehydrates after mount, so hydration is clean and saved progress
+appears a frame later.
+
+**Status never changes implicitly, so `SkillProgress.status` is optional.**
+Ticking a resource or typing a note used to create a progress entry defaulted to
+`in_progress`, which meant jotting a thought on a locked skill reported it as
+started. Activity is now recorded without claiming a status; only the Start and
+Mark done buttons set one. Absent means "derive from prerequisites".
+
+**The path chip's tagline is shown as text, not a `title` tooltip.**
+As a `title` it became the button's accessible name, so a screen reader announced
+the tagline instead of "Quant Trader". The selected path's tagline now sits under
+the chip row where everyone can read it.
+
+**The map opens at a readable zoom, not `fitView`.**
+97 skills over ten bands is far taller than one screen, so fitting the whole thing
+opens it at a zoom where no label is legible. It opens top-left at 0.8 instead;
+"fit view" is one click away in the controls.
+
+**The side panel overlays the canvas rather than pushing it.**
+Pushing would resize the React Flow viewport and move every node sideways each
+time a skill is opened.
+
+**Atlas is `/`.** It is the page I will actually open. Dashboard and Settings are
+stubs until phases 3 and 4.
