@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { DomainIcon } from "@/components/DomainIcon";
+import { Markdown } from "@/components/Markdown";
 import { domainById } from "@/data/domains";
 import { resourceId, resourcesBySkill } from "@/data/resources";
 import { skillById } from "@/data/skills";
@@ -72,6 +73,7 @@ export function SkillPanel({
   onRemoveResource,
 }: SkillPanelProps) {
   const panelRef = useRef<HTMLElement>(null);
+  const [notesMode, setNotesMode] = useState<"write" | "preview">("write");
   const [draftTitle, setDraftTitle] = useState("");
   const [draftUrl, setDraftUrl] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -388,20 +390,50 @@ export function SkillPanel({
         </section>
 
         <section>
-          <label
-            htmlFor="skill-notes"
-            className="text-[11px] tracking-wider text-[var(--muted)] uppercase"
-          >
-            Notes <span className="normal-case">(markdown)</span>
-          </label>
-          <textarea
-            id="skill-notes"
-            rows={5}
-            value={progress?.notes ?? ""}
-            onChange={(event) => onSetNotes(event.target.value)}
-            placeholder="What clicked, what did not, what to revisit…"
-            className="mt-1.5 w-full resize-y rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 font-mono text-[13px] leading-relaxed outline-none focus:border-[var(--accent)]"
-          />
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="skill-notes"
+              className="text-[11px] tracking-wider text-[var(--muted)] uppercase"
+            >
+              Notes <span className="normal-case">(markdown)</span>
+            </label>
+            <div
+              role="tablist"
+              aria-label="Notes view"
+              className="flex rounded-md border border-[var(--border)] p-0.5"
+            >
+              {(["write", "preview"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  role="tab"
+                  aria-selected={notesMode === mode}
+                  onClick={() => setNotesMode(mode)}
+                  className={`rounded px-2 py-0.5 text-[11px] capitalize transition-colors ${
+                    notesMode === mode
+                      ? "bg-[var(--border)] text-[var(--foreground)]"
+                      : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          </div>
+          {notesMode === "write" ? (
+            <textarea
+              id="skill-notes"
+              rows={5}
+              value={progress?.notes ?? ""}
+              onChange={(event) => onSetNotes(event.target.value)}
+              placeholder="What clicked, what did not, what to revisit…"
+              className="mt-1.5 w-full resize-y rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 font-mono text-[13px] leading-relaxed outline-none focus:border-[var(--accent)]"
+            />
+          ) : (
+            <div className="mt-1.5 min-h-[7.5rem] rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2">
+              <Markdown source={progress?.notes ?? ""} />
+            </div>
+          )}
         </section>
 
         <section>
