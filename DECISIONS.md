@@ -203,3 +203,29 @@ the picker never reaches the store, so the countdown cannot show `NaN`.
 **Export is a plain download of exactly what is in storage**, pretty-printed and
 named with today's date. A round-trip test takes a populated store through
 `exportState` → JSON → `importState` and asserts every field survives.
+
+## Phase 5 — README, polish, deploy
+
+**Nav collapses to icons below `sm`.**
+At 375px the wordmark wrapped onto three lines and "Settings" fell off the right
+edge. Labels are now `sr-only sm:not-sr-only`, so they leave the screen but stay
+in the accessibility tree.
+
+**Filter chips scroll sideways on a phone instead of wrapping.**
+Wrapped, the two chip rows took roughly 400px of an 812px viewport and left the
+graph a sliver. Scrolling keeps the bar at about 150px. The minimap is hidden
+below `sm` for the same reason — on a phone it covered most of the canvas.
+
+**`robots: { index: false }`.**
+This is a personal tracker, not something that should turn up in a search for my
+name. Remove it if the deployed copy is ever meant to be found.
+
+**Screenshots are real, not placeholders.**
+`docs/screenshots/` holds captures of the running app with sample progress, and
+the README says how to replace them. A portfolio repo whose README shows grey
+boxes undersells the thing.
+
+**Keyboard path through the Atlas, verified end to end:** focus a node, Enter
+opens the panel, focus moves into it, Escape closes it and focus returns to the
+node it came from. The search box is the other way in — `/` focuses it, arrows
+move through results, Enter jumps.
