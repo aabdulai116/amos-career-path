@@ -12,7 +12,16 @@ import type { StateCreator, StoreMutatorIdentifier } from "zustand";
  * entry it changes and leaves the others by reference, so reference inequality
  * is exactly "this record was touched" - no deep comparison required, and
  * nothing to keep in step as mutations are added.
+ *
+ * Wholesale replacements must opt out with SKIP_STAMP. Adopting a synced or
+ * imported document hands over entirely new objects, so every record would
+ * look touched and be restamped - which would make the device that just
+ * synced win every future merge, and make the next sync rewrite every row.
+ * That is the opposite of what the timestamps are for.
  */
+
+/** Marks a state update as "these timestamps are already correct". */
+export const SKIP_STAMP = "__skipStamp" as const;
 
 type Stamped = { updatedAt?: string };
 type RecordMap = Record<string, Stamped | undefined>;
@@ -24,6 +33,7 @@ const TRACKED = [
   "problems",
   "companies",
   "applications",
+  "opportunities",
 ] as const;
 
 export const stampChanged = <T extends object>(
@@ -99,6 +109,17 @@ const impl: StampImpl = (initializer) => (set, get, store) => {
     // A replace wipes the state rather than editing records; nothing to stamp.
     if (replace === true || update === null || update === undefined) {
       (set as (p: unknown, r?: boolean) => void)(update, replace);
+      return;
+    }
+
+    // An adopted document already carries the right timestamps.
+    if (
+      typeof update === "object" &&
+      (update as Record<string, unknown>)[SKIP_STAMP] === true
+    ) {
+      const { [SKIP_STAMP]: _skip, ...rest } = update as Record<string, unknown>;
+      void _skip;
+      (set as (p: unknown, r?: boolean) => void)(rest, replace);
       return;
     }
 

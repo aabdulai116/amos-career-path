@@ -85,9 +85,28 @@ const main = async (): Promise<void> => {
     );
   }
 
-  console.log(`one sync, cold:   ${await ms(() => saveProgress(db, "load-0", state))} ms`);
-  console.log(`one sync, repeat: ${await ms(() => saveProgress(db, "load-0", state))} ms`);
-  console.log(`one load:         ${await ms(() => loadProgress(db, "load-0"))} ms\n`);
+  const cold = await ms(() => saveProgress(db, "load-0", state));
+  let repeatReport = { written: 0, unchanged: 0, removed: 0 };
+  const repeat = await ms(async () => {
+    repeatReport = await saveProgress(db, "load-0", state);
+  });
+  console.log(`first sync (all new):  ${cold} ms`);
+  console.log(
+    `re-sync, nothing changed: ${repeat} ms — wrote ${repeatReport.written}, left ${repeatReport.unchanged} alone`,
+  );
+
+  const edited = { ...state, problems: { ...state.problems } };
+  edited.problems["problem-7"] = {
+    ...edited.problems["problem-7"],
+    notes: "changed one note",
+    updatedAt: new Date(Date.now() + 1000).toISOString(),
+  };
+  let oneReport = { written: 0, unchanged: 0, removed: 0 };
+  const one = await ms(async () => {
+    oneReport = await saveProgress(db, "load-0", edited);
+  });
+  console.log(`re-sync, one note edited: ${one} ms — wrote ${oneReport.written}`);
+  console.log(`one load:              ${await ms(() => loadProgress(db, "load-0"))} ms\n`);
 
   for (const concurrency of [1, 5, 10, 25]) {
     const t = await ms(() =>

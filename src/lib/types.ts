@@ -294,6 +294,31 @@ export interface ApplicationProgress {
   updatedAt: string;
 }
 
+/* ----------------------------------------------------------- opportunities */
+
+export type OpportunityKind = "insight-day" | "early-programme" | "conference";
+
+export interface Opportunity {
+  id: string;
+  name: string;
+  organisation: string;
+  kind: OpportunityKind;
+  /** Who it is actually open to, in the organiser's own terms. */
+  openTo: string;
+  summary: string;
+  url: string;
+}
+
+/** What I have recorded about an opportunity; deadlines come from me. */
+export interface OpportunityProgress {
+  /** YYYY-MM-DD, read off the real page. Empty until I have checked. */
+  deadline: string;
+  interested: boolean;
+  applied: boolean;
+  notes: string;
+  updatedAt: string;
+}
+
 export type SkillStatus = "locked" | "available" | "in_progress" | "done";
 
 /** Everything the user has typed or checked for one skill. */
@@ -333,6 +358,8 @@ export interface ProgressState {
   companies: Record<string, CompanyVerdict>;
   /** Keyed by listing id. */
   applications: Record<string, ApplicationProgress>;
+  /** Keyed by opportunity id. */
+  opportunities: Record<string, OpportunityProgress>;
   customResources: CustomResource[];
   /** Keyed by YYYY-MM-DD. */
   dayLogs: Record<string, DayLog>;
@@ -342,6 +369,8 @@ export interface ProgressState {
     selectedPathId: string | null;
     /** When I last opened the internships page, for "new since". */
     internshipsSeenAt: string | null;
+    /** When the intake was finished or skipped; null means never offered. */
+    onboardedAt: string | null;
     /** ISO, stamped whenever a setting changes. */
     updatedAt?: string;
   };

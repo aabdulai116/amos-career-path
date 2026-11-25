@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
@@ -33,14 +33,21 @@ beforeAll(async () => {
   client = new PGlite();
   db = drizzle(client, { schema }) as unknown as AnyPgDatabase;
 
-  const sql = readFileSync(
-    resolve(process.cwd(), "drizzle/0000_initial_schema.sql"),
-    "utf8",
-  );
-  // The generated file separates statements with drizzle's marker.
-  for (const statement of sql.split("--> statement-breakpoint")) {
-    const trimmed = statement.trim();
-    if (trimmed !== "") await client.exec(trimmed);
+  // Every migration, in order - not just the first. Applying only 0000 meant
+  // a later migration's column was missing here while existing in production,
+  // which is the exact drift these tests are supposed to catch.
+  const dir = resolve(process.cwd(), "drizzle");
+  const migrations = readdirSync(dir)
+    .filter((name) => name.endsWith(".sql"))
+    .sort();
+  expect(migrations.length).toBeGreaterThan(0);
+  for (const name of migrations) {
+    const sql = readFileSync(resolve(dir, name), "utf8");
+    // The generated file separates statements with drizzle's marker.
+    for (const statement of sql.split("--> statement-breakpoint")) {
+      const trimmed = statement.trim();
+      if (trimmed !== "") await client.exec(trimmed);
+    }
   }
 
   await client.exec(
@@ -126,6 +133,7 @@ const sample = (): ProgressState => ({
     recruitingDate: "2027-08-01",
     selectedPathId: "quant-trader",
     internshipsSeenAt: "2026-11-20T00:00:00.000Z",
+    onboardedAt: "2026-11-10T00:00:00.000Z",
     updatedAt: "2026-11-20T00:00:00.000Z",
   },
 });
@@ -210,6 +218,62 @@ describe("saving and loading progress", () => {
     await client.exec(
       `INSERT INTO "user" (id, name, email) VALUES ('${USER}', 'Amos', 'amos@example.com')`,
     );
+  });
+});
+
+describe("writing only what changed", () => {
+  it("writes everything the first time", async () => {
+    const report = await saveProgress(db, USER, sample());
+    expect(report.written).toBeGreaterThan(0);
+    expect(report.unchanged).toBe(0);
+  });
+
+  it("writes nothing at all when nothing changed", async () => {
+    // The whole point: an idle client that syncs on a timer must not rewrite
+    // every row it owns. This is the regression guard for that.
+    const state = sample();
+    await saveProgress(db, USER, state);
+    const second = await saveProgress(db, USER, state);
+    expect(second.written).toBe(0);
+    expect(second.removed).toBe(0);
+    expect(second.unchanged).toBeGreaterThan(0);
+  });
+
+  it("writes only the record that actually changed", async () => {
+    const state = sample();
+    await saveProgress(db, USER, state);
+
+    const edited = sample();
+    edited.problems["two-sum"] = {
+      ...edited.problems["two-sum"],
+      notes: "a better idea",
+      updatedAt: "2026-12-25T00:00:00.000Z",
+    };
+    const report = await saveProgress(db, USER, edited);
+    expect(report.written).toBe(1);
+    expect(report.removed).toBe(0);
+  });
+
+  it("still removes a record the caller dropped", async () => {
+    await saveProgress(db, USER, sample());
+    const fewer: ProgressState = { ...sample(), problems: {} };
+    const report = await saveProgress(db, USER, fewer);
+    expect(report.removed).toBe(1);
+    expect((await loadProgress(db, USER)).problems).toEqual({});
+  });
+
+  it("notices a day log whose counts moved, though it has no timestamp", async () => {
+    const state = sample();
+    await saveProgress(db, USER, state);
+    const busier = sample();
+    busier.dayLogs["2026-11-04"] = {
+      date: "2026-11-04",
+      hours: 5,
+      resources: 9,
+    };
+    const report = await saveProgress(db, USER, busier);
+    expect(report.written).toBe(1);
+    expect((await loadProgress(db, USER)).dayLogs["2026-11-04"].hours).toBe(5);
   });
 });
 

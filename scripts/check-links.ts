@@ -1,5 +1,5 @@
 /**
- * Verifies every URL in src/data/resources.ts.
+ * Verifies every URL in src/data/resources.ts and src/data/opportunities.ts.
  *
  *   npm run check:links
  *
@@ -16,6 +16,7 @@
  * non-zero so a dead link is a decision I make, not a silent deletion.
  */
 
+import { opportunities } from "../src/data/opportunities";
 import { resources, uniqueResourceLinks } from "../src/data/resources";
 import { skillById } from "../src/data/skills";
 
@@ -243,14 +244,24 @@ const printTable = (rows: Check[]): void => {
 };
 
 const main = async (): Promise<void> => {
-  const links = uniqueResourceLinks.map((r) => ({
-    url: r.url,
-    title: r.title,
-    creator: r.creator,
-  }));
+  // Opportunities are checked alongside resources: they are hand-curated
+  // links to other people's pages, which is exactly the thing that rots.
+  const links = [
+    ...uniqueResourceLinks.map((r) => ({
+      url: r.url,
+      title: r.title,
+      creator: r.creator,
+    })),
+    ...opportunities.map((o) => ({
+      url: o.url,
+      title: o.name,
+      creator: o.organisation,
+    })),
+  ];
 
   console.log(
-    `Checking ${links.length} unique links across ${resources.length} resource entries…\n`,
+    `Checking ${links.length} links: ${uniqueResourceLinks.length} resources, ` +
+      `${opportunities.length} opportunities…\n`,
   );
 
   const results = await inBatches(links, CONCURRENCY, checkOne);

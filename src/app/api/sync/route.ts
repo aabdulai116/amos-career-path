@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { getDb } from "@/db";
 import { mergeProgress } from "@/lib/sync";
 import { loadProgress, saveProgress } from "@/server/progress";
+import { rateLimit } from "@/server/rate-limit";
 import { parseProgressState } from "@/lib/progress-state";
 
 /**
@@ -22,6 +23,17 @@ export async function POST(request: Request): Promise<NextResponse> {
   const userId = session?.user?.id;
   if (!userId) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  }
+
+  // The client debounces to one push every few seconds; twenty a minute is
+  // far above normal use and far below anything that would strain the
+  // database. Keyed by user, so one person cannot affect anyone else.
+  const limit = rateLimit(`sync:${userId}`, { limit: 20, windowMs: 60_000 });
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Syncing too often. Try again shortly." },
+      { status: 429, headers: { "retry-after": String(limit.retryAfter) } },
+    );
   }
 
   const db = getDb();

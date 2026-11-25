@@ -88,6 +88,7 @@ export const mergeProgress = (
   problems: mergeRecords(local.problems, remote.problems),
   companies: mergeRecords(local.companies, remote.companies),
   applications: mergeRecords(local.applications, remote.applications),
+  opportunities: mergeRecords(local.opportunities, remote.opportunities),
   customResources: mergeCustomResources(
     local.customResources,
     remote.customResources,
@@ -106,6 +107,7 @@ export const isEmptyProgress = (state: ProgressState): boolean =>
   Object.keys(state.problems).length === 0 &&
   Object.keys(state.companies).length === 0 &&
   Object.keys(state.applications).length === 0 &&
+  Object.keys(state.opportunities).length === 0 &&
   state.customResources.length === 0 &&
   Object.keys(state.dayLogs).length === 0;
 

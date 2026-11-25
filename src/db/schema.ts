@@ -179,6 +179,21 @@ export const applications = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.listingId] })],
 );
 
+export const opportunityProgress = pgTable(
+  "opportunity_progress",
+  {
+    userId: owner(),
+    opportunityId: text("opportunity_id").notNull(),
+    /** YYYY-MM-DD, read off the real page rather than guessed at. */
+    deadline: text("deadline").notNull().default(""),
+    interested: boolean("interested").notNull().default(false),
+    applied: boolean("applied").notNull().default(false),
+    notes: text("notes").notNull().default(""),
+    updatedAt: touched(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.opportunityId] })],
+);
+
 export const customResources = pgTable(
   "custom_resource",
   {
@@ -211,6 +226,7 @@ export const userSettings = pgTable("user_settings", {
   recruitingDate: text("recruiting_date").notNull(),
   selectedPathId: text("selected_path_id"),
   internshipsSeenAt: text("internships_seen_at"),
+  onboardedAt: text("onboarded_at"),
   updatedAt: touched(),
 });
 
@@ -220,6 +236,7 @@ export type DbCourseProgress = typeof courseProgress.$inferSelect;
 export type DbProblemProgress = typeof problemProgress.$inferSelect;
 export type DbCompanyVerdict = typeof companyVerdicts.$inferSelect;
 export type DbApplication = typeof applications.$inferSelect;
+export type DbOpportunityProgress = typeof opportunityProgress.$inferSelect;
 export type DbCustomResource = typeof customResources.$inferSelect;
 export type DbDayLog = typeof dayLogs.$inferSelect;
 export type DbUserSettings = typeof userSettings.$inferSelect;

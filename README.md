@@ -14,7 +14,7 @@ There is no backend.
 
 ```
 TypeScript · Python · C++ · PostgreSQL · WebAssembly
-463 TS tests · 46 Python tests · 72 C++ assertions
+516 TS tests · 46 Python tests · 72 C++ assertions
 ```
 
 ![The Atlas, filtered to the Quant Trader path](docs/screenshots/atlas.jpg)
@@ -183,6 +183,33 @@ npm run sync:internships   # fetch, classify, write
 npm run test:worker        # 46 tests, no dependencies
 ```
 
+### Start here — for people who do not know yet
+![The intake](docs/screenshots/start.jpg)
+
+The rest of the app assumes you have already chosen. It opens on a graph of
+ninety-seven skills and nine paths, which is the right tool once you know what
+you want and a wall before you do.
+
+Six questions, about a minute, weighted across the nine paths. It suggests one
+to start on, shows the runners-up with their shares so the choice stays
+visibly open, and lists the five foundational skills on that path that nothing
+else blocks — what to actually open on Monday. It is a starting point, not a
+verdict, and the page says so.
+
+### Opportunities
+![Opportunities](docs/screenshots/opportunities.jpg)
+
+Insight days, early-career programmes and conferences with student travel
+grants — the things that are easy to miss because nothing lists them. Twenty
+entries, curated by hand, every link checked by `npm run check:links`
+alongside the resource library.
+
+What is deliberately absent is dates. Application windows move every year, and
+a wrong deadline in a tracker is worse than no deadline: it is the kind of
+mistake that makes someone miss the real one. You read the page, record the
+real date, and the countdown becomes something you can trust. A test asserts
+no entry mentions a month or a year.
+
 ### Accounts and sync
 Everything works signed out — progress lives in the browser, and someone
 opening a shared link gets the whole app with nothing to sign up for. That is
@@ -223,7 +250,7 @@ inline confirm.
 | Engine | C++20 → WebAssembly via Emscripten and embind |
 | Python | Pyodide 314.0.8 (CPython 3.14 → WebAssembly), in a Web Worker |
 | State | Zustand, persisted to `localStorage` |
-| Tests | Vitest (463), `unittest` (46) and a dependency-free C++ runner (72 assertions) |
+| Tests | Vitest (516), `unittest` (46) and a dependency-free C++ runner (72 assertions) |
 | Auth | Auth.js v5 — Google and Microsoft, no passwords |
 | Database | Neon Postgres with Drizzle ORM and committed migrations |
 | Deploy | Vercel |
@@ -294,6 +321,8 @@ Then open <http://localhost:3000>.
 | `npm run sync:problems` | Regenerate the NeetCode 150 from NeetCode's published data |
 | `npm run sync:internships` | Refetch and reclassify the internship listings |
 | `npm run test:worker` | The Python worker's tests |
+| `npm run db:migrate` | Apply migrations to the database |
+| `npm run db:loadtest` | Measure sync cost against a throwaway database |
 | `npx drizzle-kit generate` | Create a migration after a schema change |
 | `npx drizzle-kit migrate` | Apply migrations to the database |
 

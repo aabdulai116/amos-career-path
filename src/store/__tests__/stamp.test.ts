@@ -130,3 +130,62 @@ describe("the store, stamped end to end", () => {
     expect(useProgress.getState().skills.probability).toBe(before);
   });
 });
+
+describe("adopting a document does not restamp it", () => {
+  beforeEach(() => {
+    useProgress.getState().resetAll();
+  });
+
+  it("keeps the timestamps an imported state arrived with", () => {
+    // If importing restamped, the device that just synced would win every
+    // later merge and the next sync would rewrite every row.
+    const imported = {
+      version: 1 as const,
+      skills: {
+        probability: {
+          status: "done" as const,
+          notes: "from the server",
+          proofUrl: "",
+          hoursLogged: 1,
+          completedAt: null,
+          resourcesWatched: [],
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+      },
+      course: {},
+      problems: {},
+      companies: {},
+      applications: {},
+      customResources: [],
+      dayLogs: {},
+      settings: {
+        recruitingDate: "2027-08-01",
+        selectedPathId: null,
+        internshipsSeenAt: null,
+        onboardedAt: null,
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+    };
+
+    expect(useProgress.getState().importState(imported).ok).toBe(true);
+    expect(useProgress.getState().skills.probability.updatedAt).toBe(
+      "2026-01-01T00:00:00.000Z",
+    );
+    expect(useProgress.getState().settings.updatedAt).toBe(
+      "2026-01-01T00:00:00.000Z",
+    );
+  });
+
+  it("still stamps an edit made after adopting one", () => {
+    useProgress.getState().setNotes("probability", "mine now");
+    const stamp = useProgress.getState().skills.probability.updatedAt;
+    expect(stamp).toBeTruthy();
+    expect(stamp).not.toBe("2026-01-01T00:00:00.000Z");
+  });
+
+  it("leaves no marker field behind in the state", () => {
+    const state = useProgress.getState() as unknown as Record<string, unknown>;
+    expect(state.__skipStamp).toBeUndefined();
+    expect(useProgress.getState().exportState()).not.toHaveProperty("__skipStamp");
+  });
+});

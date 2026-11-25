@@ -17,12 +17,14 @@ const base = (): ProgressState => ({
   problems: {},
   companies: {},
   applications: {},
+  opportunities: {},
   customResources: [],
   dayLogs: {},
   settings: {
     recruitingDate: "2027-08-01",
     selectedPathId: null,
     internshipsSeenAt: null,
+    onboardedAt: null,
   },
 });
 

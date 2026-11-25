@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { stamp } from "@/store/stamp";
+import { SKIP_STAMP, stamp } from "@/store/stamp";
 import { dayKey } from "@/lib/dates";
 import {
   DEFAULT_RECRUITING_DATE,
@@ -22,6 +22,7 @@ export {
 import type {
   ApplicationProgress,
   ApplicationStage,
+  OpportunityProgress,
   CompanyVerdict,
   CptVerdict,
   CustomResource,
@@ -109,6 +110,14 @@ interface Actions {
   setApplicationNotes: (listingId: string, notes: string) => void;
   /** Stamp the internships page as seen, for the "new since" count. */
   markInternshipsSeen: () => void;
+  /** Record that the intake was finished or skipped. */
+  markOnboarded: () => void;
+  /** Record a deadline read off the real page, or interest, or an application. */
+  setOpportunity: (
+    id: string,
+    patch: Partial<Omit<OpportunityProgress, "updatedAt">>,
+  ) => void;
+  clearOpportunity: (id: string) => void;
   setRecruitingDate: (iso: string) => void;
   setSelectedPath: (pathId: string | null) => void;
   importState: (raw: unknown) => { ok: true } | { ok: false; error: string };
@@ -473,6 +482,42 @@ export const useProgress = create<ProgressStore>()(
           },
         })),
 
+      setOpportunity: (id, patch) =>
+        set((state) => {
+          const existing = state.opportunities[id] ?? {
+            deadline: "",
+            interested: false,
+            applied: false,
+            notes: "",
+            updatedAt: "",
+          };
+          return {
+            opportunities: {
+              ...state.opportunities,
+              [id]: { ...existing, ...patch },
+            },
+            dayLogs:
+              patch.applied === true
+                ? touchDay(state.dayLogs, 0, 1)
+                : state.dayLogs,
+          };
+        }),
+
+      clearOpportunity: (id) =>
+        set((state) => {
+          const next = { ...state.opportunities };
+          delete next[id];
+          return { opportunities: next };
+        }),
+
+      markOnboarded: () =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            onboardedAt: new Date().toISOString(),
+          },
+        })),
+
       setRecruitingDate: (iso) =>
         set((state) => ({
           settings: { ...state.settings, recruitingDate: iso },
@@ -486,7 +531,10 @@ export const useProgress = create<ProgressStore>()(
       importState: (raw) => {
         const parsed = parseProgressState(raw);
         if (!parsed.ok) return { ok: false, error: parsed.error };
-        set(parsed.state);
+        // The timestamps in an imported or synced document are the whole
+        // point of it; restamping them here would make this device win every
+        // later merge and make the next sync rewrite every row.
+        set({ ...parsed.state, [SKIP_STAMP]: true } as Partial<ProgressStore>);
         return { ok: true };
       },
 
@@ -498,6 +546,7 @@ export const useProgress = create<ProgressStore>()(
           problems,
           companies,
           applications,
+          opportunities,
           customResources,
           dayLogs,
           settings,
@@ -509,13 +558,15 @@ export const useProgress = create<ProgressStore>()(
           problems,
           companies,
           applications,
+          opportunities,
           customResources,
           dayLogs,
           settings,
         };
       },
 
-      resetAll: () => set({ ...initialState }),
+      resetAll: () =>
+        set({ ...initialState, [SKIP_STAMP]: true } as Partial<ProgressStore>),
 
     })),
     {
@@ -532,6 +583,7 @@ export const useProgress = create<ProgressStore>()(
         problems,
         companies,
         applications,
+        opportunities,
         customResources,
         dayLogs,
         settings,
@@ -542,6 +594,7 @@ export const useProgress = create<ProgressStore>()(
         problems,
         companies,
         applications,
+        opportunities,
         customResources,
         dayLogs,
         settings,

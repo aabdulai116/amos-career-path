@@ -6,6 +6,8 @@ import {
   Briefcase,
   CandlestickChart,
   Code2,
+  CalendarClock,
+  Compass,
   GitBranch,
   GraduationCap,
   LayoutGrid,
@@ -14,11 +16,13 @@ import {
 } from "lucide-react";
 
 const links = [
+  { href: "/start", label: "Start here", icon: Compass },
   { href: "/", label: "Atlas", icon: GitBranch },
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/course", label: "Course", icon: GraduationCap },
   { href: "/practice", label: "Practice", icon: Code2 },
   { href: "/internships", label: "Internships", icon: Briefcase },
+  { href: "/opportunities", label: "Opportunities", icon: CalendarClock },
   { href: "/orderbook", label: "Order book", icon: CandlestickChart },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/account", label: "Account", icon: UserRound },
@@ -38,7 +42,13 @@ export function Nav() {
         </span>
       </Link>
 
-      <nav aria-label="Main" className="ml-auto flex items-center gap-1 lg:ml-0">
+      {/* Ten destinations do not fit on a phone. Scrolling keeps every one
+          reachable; hiding some behind a menu would bury the pages a new
+          user most needs. */}
+      <nav
+        aria-label="Main"
+        className="ml-auto flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] lg:ml-0 [&::-webkit-scrollbar]:hidden"
+      >
         {links.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (

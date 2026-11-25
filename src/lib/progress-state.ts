@@ -21,12 +21,14 @@ export const initialState: ProgressState = {
   problems: {},
   companies: {},
   applications: {},
+  opportunities: {},
   customResources: [],
   dayLogs: {},
   settings: {
     recruitingDate: DEFAULT_RECRUITING_DATE,
     selectedPathId: null,
     internshipsSeenAt: null,
+    onboardedAt: null,
   },
 };
 
@@ -68,6 +70,10 @@ export const parseProgressState = (
         typeof value.applications === "object" && value.applications !== null
           ? value.applications
           : {},
+      opportunities:
+        typeof value.opportunities === "object" && value.opportunities !== null
+          ? value.opportunities
+          : {},
       customResources: Array.isArray(value.customResources)
         ? value.customResources
         : [],
@@ -88,6 +94,16 @@ export const parseProgressState = (
           typeof value.settings?.internshipsSeenAt === "string"
             ? value.settings.internshipsSeenAt
             : null,
+        onboardedAt:
+          typeof value.settings?.onboardedAt === "string"
+            ? value.settings.onboardedAt
+            : null,
+        // Carried through, not rebuilt: dropping it would make settings lose
+        // every merge, because an undefined stamp always loses to a real one.
+        updatedAt:
+          typeof value.settings?.updatedAt === "string"
+            ? value.settings.updatedAt
+            : undefined,
       },
     },
   };

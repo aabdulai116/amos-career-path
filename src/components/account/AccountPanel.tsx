@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
+import Link from "next/link";
 import { progressSize } from "@/lib/sync";
 import { useProgress } from "@/store/progress";
 import { useHydrateProgress } from "@/store/useHydrateProgress";
@@ -215,7 +216,11 @@ export function AccountPanel({ providers }: { providers: string[] }) {
             ))}
             <p className="pt-1 text-xs text-[var(--muted)]">
               No passwords. Signing in uses an account you already have, so
-              there is nothing here for anyone to steal.
+              there is nothing here for anyone to steal.{" "}
+              <Link href="/privacy" className="text-[var(--accent)] hover:underline">
+                What gets stored
+              </Link>
+              .
             </p>
           </section>
 

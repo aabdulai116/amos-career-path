@@ -72,6 +72,17 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 - [x] Depth ladder, live stats, order entry, trade tape, imbalance bar
 - [x] Market-making game on top of the engine — quote, get filled, manage inventory, scored on adverse selection
 
+### Phase 14 — onboarding, opportunities, privacy and scale, shipped
+- [x] **Start here**: a six-question intake that suggests a path and five
+      first skills, for people who do not know what they want yet
+- [x] **Opportunities**: 20 insight days, early programmes and conferences,
+      all links verified, with deadlines you record rather than ones I guessed
+- [x] **Privacy page** saying exactly what is stored and what is not
+- [x] **Sync writes only what changed** — an idle sync now writes 0 rows
+      instead of 531, measured
+- [x] Rate limiting on /api/sync, per user
+- [x] Nav scrolls on a phone now there are ten destinations
+
 ### Phase 13 — accounts, sync and CI, shipped
 - [x] Sign in with Google or Microsoft (Auth.js v5), no passwords
 - [x] Neon Postgres with Drizzle, twelve tables, migrations committed
@@ -165,11 +176,10 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
       The runner executes whatever you write, asserts included
 
 ### Opportunities
-- [ ] Insight days and spring/early-insight programmes
-- [ ] Fully funded conferences for SWE and quant
-- [ ] Deadline countdowns on each
-- [ ] Curated by hand — there is no API for these, and I would rather say so
-      than pretend otherwise
+- [x] Insight days and spring/early-insight programmes
+- [x] Fully funded conferences for SWE and quant
+- [x] Deadline countdowns — on dates you record, not ones invented here
+- [x] Curated by hand — there is no API for these, and the page says so
 - [!] **Scheduled "look for opportunities" task** — you mentioned you already had
       one; I checked this machine and there are none. *Say the word and I'll create it.*
 

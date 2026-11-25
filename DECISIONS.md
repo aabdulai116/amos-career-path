@@ -700,3 +700,57 @@ The real weakness it exposed is not speed, it is write amplification: every
 sync deletes and reinserts all 531 rows even when one note changed. That is
 fine at tens of users and is the first thing that will hurt at hundreds.
 `npm run db:loadtest` is the script that measures it.
+
+## Phase 14 — onboarding, opportunities, privacy and the write-amplification fix
+
+**The app assumed you had already chosen.** It opens on ninety-seven skills
+and nine paths, which is right for someone who knows what they want and a wall
+for a first-year who does not — and first-years are who it is now being shared
+with. The intake is six weighted questions. It shows the runners-up with their
+shares rather than pronouncing one answer, because the honest claim is "these
+three fit, start with this one", and a path chosen at eighteen should not feel
+like a verdict. A test asserts every path is reachable from some combination,
+so none is decorative.
+
+**Opportunities carry no dates, deliberately.** Application windows move every
+year. A wrong deadline in a tracker is worse than none: it is what makes
+someone miss the real one. Each entry carries the link, who it is open to and
+what it is; the deadline is read off the page and recorded by the user, and
+only then does a countdown appear. A test fails if any entry's text contains a
+month or a year. Every URL was checked before inclusion — three of the twenty
+candidates 404'd and were replaced, two were dropped for blocking automated
+checks — and they now run through `check:links` with the resource library.
+
+**The countdown was a day out at first.** It compared an end-of-day deadline
+against a midnight today, so something due today reported one day left. Both
+sides are now reduced to a calendar date. That is precisely the error the
+feature exists to prevent, which is why it has its own test.
+
+**Write amplification, measured and fixed.** The first save deleted every row
+for the user and reinserted all of them. For a heavy user that is 531 rows
+rewritten because one note changed. Each table is now diffed on its timestamp
+first: an unchanged sync writes nothing at all. Measured on the same hardware,
+the same payload went from 531 rows in 19 ms to 0 rows in 3 ms, and a
+one-field edit now writes exactly one row.
+
+**That fix exposed a worse bug.** Diffing on timestamps only works if adopting
+a synced document does not restamp it — and the stamping middleware was
+restamping everything `importState` touched. Left alone, a device that had
+just synced would have won every subsequent merge and rewritten every row on
+the next push, quietly undoing both the merge semantics and the fix. Wholesale
+adoptions now opt out explicitly. It surfaced as a flaky test, which is the
+only reason it was found.
+
+**`parseProgressState` was dropping the settings timestamp**, so settings lost
+every merge. Found by the same test.
+
+**Rate limiting is in memory, and says so.** On serverless that makes it a
+guard against a runaway client rather than a defence against an attacker
+spreading requests across instances. Doing it properly needs shared state;
+claiming the stronger property would have been the easy lie.
+
+**A privacy page, because this now holds other people's data.** Short, in
+plain words, and specific: what is stored, what is not, who can see it, and
+that I could technically query the database because I host it. The audience is
+a first-year deciding whether to sign in with their university account, and
+nobody has ever been reassured by boilerplate.
