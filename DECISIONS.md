@@ -123,3 +123,48 @@ time a skill is opened.
 
 **Atlas is `/`.** It is the page I will actually open. Dashboard and Settings are
 stubs until phases 3 and 4.
+
+## Phase 3 — Dashboard
+
+**The chart gets its own hue, `--chart-series: #2d9fd4`.**
+The UI accent `#38bdf8` sits at OKLCH lightness 0.75, above the 0.48–0.67 band a
+data mark needs to stay readable on this dark surface — the palette validator
+fails it. `#2d9fd4` passes the lightness band and clears 3:1 contrast against the
+card surface. The accent stays as it is for buttons and links, which are text and
+UI, not data.
+
+**Hours per week is a column chart, not a line.**
+Weekly totals are discrete buckets with plenty of empty weeks; a line would draw
+a slope between two weeks that never happened. Columns are capped at 24px with a
+2px gap, hairline grid, no legend (one series), and only the best week is labelled
+directly — the rest is in the hover tooltip and the table view behind the "Table"
+button.
+
+**Domain and path progress are meter lists, one hue.**
+The bar encodes a ratio against that row's own total, which is a magnitude job, so
+every bar is `--chart-series`. The domain's own colour appears as a dot beside the
+name — identity next to the mark, not in it. Ten domain hues as data marks would
+fail CVD separation.
+
+**Four headline numbers are stat tiles, not a bar chart.**
+Overall %, done, unlocked now and in progress are unrelated measures on different
+scales. The countdown is the hero figure, since it is the one number the page is
+really about.
+
+**Anything that depends on "now" or on saved progress renders `—` until
+hydration.**
+The countdown, the pace, the streak and the chart all read the clock or
+localStorage, neither of which the server can know. Cards keep fixed heights and
+the lists keep min-heights, so the values fill in without the layout moving.
+
+**Finished skills with no proof link are shown, not hidden.**
+This is the list resume bullets come from, so an empty row with an "add a link"
+button is more useful than a shorter, tidier list.
+
+**Deep links: `/?skill=<id>` opens that skill in the Atlas.**
+Read with `useSearchParams` and used as the selection until the session picks its
+own, so no effect writes state on mount. The Atlas page is wrapped in `Suspense`
+to keep the rest statically rendered.
+
+**The path chips appear on both pages** and write to the same persisted setting,
+so changing the path on the dashboard changes what the Atlas highlights.
