@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check:links": "tsx scripts/check-links.ts"
+    "check:links": "tsx scripts/check-links.ts",
+    "test:engine": "make -C engine test",
+    "build:engine": "make -C engine wasm"
   },
   "dependencies": {
     "@xyflow/react": "^12.8.6",
