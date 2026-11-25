@@ -7,6 +7,13 @@ export const dayKey = (d: Date = new Date()): string => {
 
 export const parseDayKey = (key: string): Date => new Date(`${key}T00:00:00`);
 
+/** True for a real calendar date written as YYYY-MM-DD. */
+export const isValidDayKey = (value: string): boolean => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = parseDayKey(value);
+  return !Number.isNaN(date.getTime()) && dayKey(date) === value;
+};
+
 export const addDays = (d: Date, days: number): Date => {
   const out = new Date(d);
   out.setDate(out.getDate() + days);
