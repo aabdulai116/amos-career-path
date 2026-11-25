@@ -2,27 +2,34 @@
 
 import { useRef, useState } from "react";
 import { Loader2, Play, RotateCcw } from "lucide-react";
-import { usePython } from "@/components/practice/PythonProvider";
-import { PYODIDE_VERSION, describeOutcome, starterCode } from "@/lib/python";
-import type { Problem } from "@/lib/types";
+import { usePython } from "@/components/python/PythonProvider";
+import { PYODIDE_VERSION, describeOutcome } from "@/lib/python";
 
 /**
- * A Python scratchpad per problem. Deliberately not a judge: there is no
- * hidden test suite here, because the real test cases live on LeetCode and
- * inventing my own would only check my own assumptions. You write the solution
- * and the asserts, press Run, and real CPython tells you the truth.
+ * A Python scratchpad, used both by the NeetCode problems and by the course
+ * exercises. Deliberately not a judge: there is no hidden test suite, because
+ * for the problems the real cases live on LeetCode, and for the exercises the
+ * point is that I decide what "right" looks like. You write the code and the
+ * asserts, press Run, and real CPython tells you the truth.
  *
- * Whatever is in the box is saved as that problem's solution, so this doubles
- * as the record I reread the week before an interview.
+ * Whatever is in the box is saved by the caller, so it doubles as the record.
  */
-export function CodeRunner({
-  problem,
+export function PythonEditor({
+  id,
+  starter,
   value,
   onChange,
+  label = "My solution",
+  rows = 12,
 }: {
-  problem: Problem;
+  /** Unique on the page; used for the element ids that tie labels together. */
+  id: string;
+  /** Shown when nothing has been written yet. */
+  starter: string;
   value: string;
   onChange: (code: string) => void;
+  label?: string;
+  rows?: number;
 }) {
   const { phase, stage, version, error, run } = usePython();
   const [output, setOutput] = useState<string | null>(null);
@@ -31,8 +38,9 @@ export function CodeRunner({
   const [ms, setMs] = useState<number | null>(null);
   const streamed = useRef<string[]>([]);
 
-  const code = value === "" ? starterCode(problem) : value;
+  const code = value === "" ? starter : value;
   const loading = busy && phase !== "ready";
+  const outputId = `py-${id}-output`;
 
   const onRun = async (): Promise<void> => {
     setBusy(true);
@@ -45,28 +53,26 @@ export function CodeRunner({
       setOutput(streamed.current.join("").trimEnd());
     });
 
-    setOk(outcome.ok && !outcome.timedOut);
+    setOk(outcome.ok && !outcome.timedOut && !outcome.bootFailed);
     setOutput(describeOutcome(outcome));
-    setMs(outcome.timedOut ? null : outcome.ms);
+    setMs(outcome.timedOut || outcome.bootFailed ? null : outcome.ms);
     setBusy(false);
   };
-
-  const outputId = `runner-${problem.slug}-output`;
 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <label
-          htmlFor={`runner-${problem.slug}`}
+          htmlFor={`py-${id}`}
           className="text-xs font-medium text-[var(--muted)]"
         >
-          My solution
+          {label}
         </label>
         <div className="flex items-center gap-2">
           {value !== "" && (
             <button
               type="button"
-              onClick={() => onChange(starterCode(problem))}
+              onClick={() => onChange(starter)}
               className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
             >
               <RotateCcw className="size-3" aria-hidden />
@@ -90,20 +96,19 @@ export function CodeRunner({
       </div>
 
       <textarea
-        id={`runner-${problem.slug}`}
+        id={`py-${id}`}
         value={code}
         onChange={(event) => onChange(event.target.value)}
         spellCheck={false}
-        rows={12}
+        rows={rows}
         // Tab should indent, not leave the box; a code editor that loses focus
-        // on Tab is unusable.
+        // on Tab is unusable, and Python without indentation is nothing.
         onKeyDown={(event) => {
           if (event.key !== "Tab") return;
           event.preventDefault();
           const area = event.currentTarget;
           const { selectionStart: start, selectionEnd: end } = area;
-          const next = `${code.slice(0, start)}    ${code.slice(end)}`;
-          onChange(next);
+          onChange(`${code.slice(0, start)}    ${code.slice(end)}`);
           requestAnimationFrame(() => {
             area.selectionStart = start + 4;
             area.selectionEnd = start + 4;

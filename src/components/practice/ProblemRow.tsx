@@ -10,7 +10,7 @@ import {
   Lock,
   Youtube,
 } from "lucide-react";
-import { CodeRunner } from "@/components/practice/CodeRunner";
+import { PythonEditor } from "@/components/python/PythonEditor";
 import {
   DIFFICULTY_COLOR,
   formatMinutes,
@@ -18,6 +18,7 @@ import {
   solutionUrl,
   videoUrl,
 } from "@/lib/practice";
+import { starterCode } from "@/lib/python";
 import type { Problem, ProblemProgress } from "@/lib/types";
 
 interface ProblemRowProps {
@@ -30,6 +31,7 @@ interface ProblemRowProps {
   onNotes: (notes: string) => void;
   onSolution: (solution: string) => void;
   onHint: (usedHint: boolean) => void;
+  onComplexity: (kind: "time" | "space", value: string) => void;
 }
 
 export function ProblemRow({
@@ -41,6 +43,7 @@ export function ProblemRow({
   onNotes,
   onSolution,
   onHint,
+  onComplexity,
 }: ProblemRowProps) {
   const [open, setOpen] = useState(false);
   const [minutes, setMinutes] = useState("");
@@ -48,6 +51,12 @@ export function ProblemRow({
   const status = progress?.status;
   const solved = status === "solved";
   const panelId = `problem-${problem.slug}-detail`;
+  const time = progress?.timeComplexity.trim() ?? "";
+  const space = progress?.spaceComplexity.trim() ?? "";
+  const complexity =
+    time === "" && space === ""
+      ? null
+      : `${time === "" ? "?" : time} / ${space === "" ? "?" : space}`;
 
   const logSitting = (): void => {
     const value = Number(minutes);
@@ -109,6 +118,13 @@ export function ProblemRow({
               className="size-3.5 shrink-0 text-[var(--muted)]"
               aria-label="Attempted"
             />
+          )}
+          {/* The whole point of writing it down is seeing it without opening
+              the row - this is what a revision pass reads. */}
+          {complexity !== null && (
+            <span className="hidden shrink-0 font-mono text-[10px] text-[var(--muted)] md:inline">
+              {complexity}
+            </span>
           )}
 
           {/* The word is always present, so difficulty is never colour alone. */}
@@ -269,8 +285,47 @@ export function ProblemRow({
             />
           </div>
 
-          <CodeRunner
-            problem={problem}
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <label
+                htmlFor={`time-${problem.slug}`}
+                className="block text-xs font-medium text-[var(--muted)]"
+              >
+                Time complexity
+              </label>
+              <input
+                id={`time-${problem.slug}`}
+                type="text"
+                value={progress?.timeComplexity ?? ""}
+                onChange={(event) => onComplexity("time", event.target.value)}
+                placeholder="O(n)"
+                className="mt-1 w-28 rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1 font-mono text-xs"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor={`space-${problem.slug}`}
+                className="block text-xs font-medium text-[var(--muted)]"
+              >
+                Space complexity
+              </label>
+              <input
+                id={`space-${problem.slug}`}
+                type="text"
+                value={progress?.spaceComplexity ?? ""}
+                onChange={(event) => onComplexity("space", event.target.value)}
+                placeholder="O(1)"
+                className="mt-1 w-28 rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1 font-mono text-xs"
+              />
+            </div>
+            <p className="pb-1.5 text-xs text-[var(--muted)]">
+              Write it in your own words — the point is having to decide.
+            </p>
+          </div>
+
+          <PythonEditor
+            id={problem.slug}
+            starter={starterCode(problem)}
             value={progress?.solution ?? ""}
             onChange={onSolution}
           />

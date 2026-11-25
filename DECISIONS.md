@@ -442,3 +442,65 @@ Duplicate with two asserts printed `both cases pass` in 3 ms under Python
 three-line traceback; the code survived a full page reload; the Blind 75 switch
 rescoped all four stat tiles and the list to 75; and the page has no horizontal
 overflow at 375 px.
+
+## Phase 11 — course priorities, exercises and complexity notes
+
+**Priorities are judged against the destination, not the teaching.** Every one
+of the 102 days is core, useful or skim with a line saying why. The split came
+out at 37 core, 36 useful, 29 skim, and a test asserts core stays under half the
+course — if most of it were core the marking would say nothing. Another test
+names fourteen days that must stay core (dictionaries, OOP, files, pandas,
+comprehensions, SQL, git, groupby, time series, NumPy, regression, statistics,
+the end-to-end model) and four turtle-graphics days that must stay skim, so a
+later edit cannot quietly reshuffle the curriculum.
+
+**Only "core" is coloured.** The question the panel answers is "where do I slow
+down?", and one highlighted class answers it faster than three competing hues.
+The word is always rendered beside the colour.
+
+**The useful number is hours, not day counts.** "29 days of skim" means nothing;
+"16.1 hours you can watch at speed" is a decision. Each class totals the run
+time of its unwatched days, and a "next core day" line skips past everything
+skimmable.
+
+**Randomisation, specifically.** Day 4 is marked core, but for lists rather than
+for `random`. The note says so: `random` looks like a toy at that point and comes
+back for real in Monte Carlo on Day 80 and in this app's own market-making game.
+That was a direct question and it deserved a direct answer in the data rather
+than a shrug.
+
+**205 exercises, weighted by priority.** Core days get three drills, useful two,
+skim one — a test asserts the mean exercise count decreases across the three
+classes. They are deliberately separate from the day's project: a project takes
+an evening, a drill takes ten minutes and answers "did that land?".
+
+**Exercises that cannot run here say so.** Pyodide has no window, no browser and
+no socket, so a Tkinter or Flask or live-API drill would fail in a way that
+looks like the learner's fault. Those carry `runnable: false` and render a line
+saying to build them locally. 78% run in the page; a test holds that ratio above
+75% and asserts no unrunnable exercise carries starter code.
+
+**Packages load on demand.** `loadPackagesFromImports` runs before the code, so
+`import pandas` fetches numpy, pandas and their dependencies the first time and
+is free afterwards. That makes the Day 25, 72–81 and 92 exercises genuinely
+runnable — verified in the browser: a pandas DataFrame printed, and matplotlib
+wrote a 22 KB PNG to the virtual filesystem in 1.6 seconds.
+
+**Two bugs the browser found and the tests could not.** Pyodide's `batched`
+stdout callback hands over a line with the newline already stripped, so the
+first pandas run arrived as one unreadable paragraph; the worker puts the
+newline back. And `loadPackagesFromImports` prints "Loading numpy, pandas…" to
+stdout, which made library chatter look like program output; it now goes to the
+status line through `messageCallback`.
+
+**The matplotlib deprecation warning is explained, not suppressed.** `savefig`
+emits two MatplotlibDeprecationWarnings on this version, from inside the
+library. Filtering them would teach the wrong habit, so the starter says where
+they come from and that a warning is not an error — reading that difference is
+part of the exercise.
+
+**Complexity is two free-text fields.** Not a dropdown: half the value is having
+to decide, and "O(n) amortised" or "O(log n) average, O(n) worst" does not fit a
+picker. Both halves are needed before the pair shows on the collapsed row, and
+the practice page counts solved problems with no Big-O written down, because
+that gap is exactly what a revision pass would otherwise discover too late.

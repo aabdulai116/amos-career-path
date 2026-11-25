@@ -28,6 +28,8 @@ const emptyProblem = (): ProblemProgress => ({
   attempts: 0,
   minutes: 0,
   notes: "",
+  timeComplexity: "",
+  spaceComplexity: "",
   solution: "",
   usedHint: false,
   solvedAt: null,
@@ -37,6 +39,8 @@ const emptyProblem = (): ProblemProgress => ({
 const emptyDay = (): DayProgress => ({
   watched: false,
   projectDone: false,
+  exercisesDone: [],
+  exerciseCode: {},
   notes: "",
   repoUrl: "",
   lectureUrl: "",
@@ -74,11 +78,20 @@ interface Actions {
   setDayNotes: (day: number, notes: string) => void;
   setDayRepoUrl: (day: number, url: string) => void;
   setDayLectureUrl: (day: number, url: string) => void;
+  /** Tick one of a day's practice exercises off, or back on. */
+  toggleExercise: (day: number, exerciseId: string) => void;
+  setExerciseCode: (day: number, exerciseId: string, code: string) => void;
   /** NeetCode 150: record a sitting, a solve, or clear the problem. */
   setProblemStatus: (slug: string, status: ProblemStatus | "reset") => void;
   logAttempt: (slug: string, minutes: number) => void;
   setProblemNotes: (slug: string, notes: string) => void;
   setProblemSolution: (slug: string, solution: string) => void;
+  /** Big-O, written in my own words; "time" or "space". */
+  setProblemComplexity: (
+    slug: string,
+    kind: "time" | "space",
+    value: string,
+  ) => void;
   setProblemHint: (slug: string, usedHint: boolean) => void;
   setRecruitingDate: (iso: string) => void;
   setSelectedPath: (pathId: string | null) => void;
@@ -371,6 +384,22 @@ export const useProgress = create<ProgressStore>()(
           },
         })),
 
+      setProblemComplexity: (slug, kind, value) =>
+        set((state) => {
+          const existing = state.problems[slug] ?? emptyProblem();
+          return {
+            problems: {
+              ...state.problems,
+              [slug]: {
+                ...existing,
+                ...(kind === "time"
+                  ? { timeComplexity: value }
+                  : { spaceComplexity: value }),
+              },
+            },
+          };
+        }),
+
       setProblemHint: (slug, usedHint) =>
         set((state) => ({
           problems: {
@@ -378,6 +407,38 @@ export const useProgress = create<ProgressStore>()(
             [slug]: { ...(state.problems[slug] ?? emptyProblem()), usedHint },
           },
         })),
+
+      toggleExercise: (day, exerciseId) =>
+        set((state) => {
+          const existing = state.course[day] ?? emptyDay();
+          const done = existing.exercisesDone.includes(exerciseId);
+          return {
+            course: {
+              ...state.course,
+              [day]: {
+                ...existing,
+                exercisesDone: done
+                  ? existing.exercisesDone.filter((id) => id !== exerciseId)
+                  : [...existing.exercisesDone, exerciseId],
+              },
+            },
+            dayLogs: done ? state.dayLogs : touchDay(state.dayLogs, 0, 1),
+          };
+        }),
+
+      setExerciseCode: (day, exerciseId, code) =>
+        set((state) => {
+          const existing = state.course[day] ?? emptyDay();
+          return {
+            course: {
+              ...state.course,
+              [day]: {
+                ...existing,
+                exerciseCode: { ...existing.exerciseCode, [exerciseId]: code },
+              },
+            },
+          };
+        }),
 
       setRecruitingDate: (iso) =>
         set((state) => ({

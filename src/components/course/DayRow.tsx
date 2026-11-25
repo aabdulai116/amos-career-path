@@ -1,10 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronDown, ExternalLink, Hammer, Link2, Play } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ExternalLink,
+  Hammer,
+  Link2,
+  Play,
+} from "lucide-react";
+import { ExerciseCard } from "@/components/course/ExerciseCard";
 import { Markdown } from "@/components/Markdown";
 import { COURSE_URL } from "@/data/course";
-import { TRACK_COLOR, formatRuntime } from "@/lib/course";
+import {
+  PRIORITY_BLURB,
+  PRIORITY_COLOR,
+  PRIORITY_LABEL,
+  TRACK_COLOR,
+  formatRuntime,
+} from "@/lib/course";
 import type { CourseDay, DayProgress } from "@/lib/types";
 
 interface DayRowProps {
@@ -16,6 +30,8 @@ interface DayRowProps {
   onNotes: (notes: string) => void;
   onRepoUrl: (url: string) => void;
   onLectureUrl: (url: string) => void;
+  onToggleExercise: (exerciseId: string, done: boolean) => void;
+  onExerciseCode: (exerciseId: string, code: string) => void;
 }
 
 export function DayRow({
@@ -27,6 +43,8 @@ export function DayRow({
   onNotes,
   onRepoUrl,
   onLectureUrl,
+  onToggleExercise,
+  onExerciseCode,
 }: DayRowProps) {
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -34,6 +52,9 @@ export function DayRow({
   const watched = progress?.watched ?? false;
   const projectDone = progress?.projectDone ?? false;
   const panelId = `day-${day.day}-detail`;
+  const exercisesDone = day.exercises.filter((e) =>
+    progress?.exercisesDone.includes(e.id),
+  ).length;
 
   return (
     <li
@@ -69,6 +90,22 @@ export function DayRow({
           >
             {day.title}
           </span>
+          {/* Only "core" is highlighted: the question is where to slow down,
+              and one marked class answers it faster than three would. */}
+          <span
+            className="hidden w-12 shrink-0 text-right font-mono text-[10px] sm:inline"
+            style={{
+              color: PRIORITY_COLOR[day.priority],
+              opacity: day.priority === "skim" ? 0.6 : 1,
+            }}
+          >
+            {PRIORITY_LABEL[day.priority]}
+          </span>
+          {day.exercises.length > 0 && (
+            <span className="hidden shrink-0 font-mono text-[10px] text-[var(--muted)] md:inline">
+              {exercisesDone}/{day.exercises.length}
+            </span>
+          )}
           {projectDone && (
             <Hammer className="size-3.5 shrink-0 text-[var(--chart-series)]" aria-label="Practice project built" />
           )}
@@ -87,6 +124,22 @@ export function DayRow({
           id={panelId}
           className="space-y-4 border-t border-[var(--border)] px-3 py-4"
         >
+          <p
+            className="rounded-lg border-l-2 py-1 pl-3 text-xs leading-relaxed"
+            style={{
+              borderColor: PRIORITY_COLOR[day.priority],
+              color: "var(--muted)",
+            }}
+          >
+            <span
+              className="font-medium"
+              style={{ color: PRIORITY_COLOR[day.priority] }}
+            >
+              {PRIORITY_LABEL[day.priority]} — {PRIORITY_BLURB[day.priority]}
+            </span>{" "}
+            {day.priorityNote}
+          </p>
+
           <div className="flex flex-wrap items-center gap-2">
             <a
               href={progress?.lectureUrl?.trim() || COURSE_URL}
@@ -144,6 +197,32 @@ export function DayRow({
                   </div>
                 </div>
               </div>
+            </section>
+          )}
+
+          {day.exercises.length > 0 && (
+            <section>
+              <h3 className="text-[11px] tracking-wider text-[var(--muted)] uppercase">
+                Practice — {exercisesDone}/{day.exercises.length} done
+              </h3>
+              <p className="mt-0.5 mb-2 text-xs text-[var(--muted)]">
+                Short drills for straight after the lectures. The project above
+                takes an evening; these take ten minutes and tell you whether it
+                landed.
+              </p>
+              <ul className="space-y-2">
+                {day.exercises.map((exercise) => (
+                  <ExerciseCard
+                    key={exercise.id}
+                    exercise={exercise}
+                    day={day.day}
+                    done={progress?.exercisesDone.includes(exercise.id) ?? false}
+                    code={progress?.exerciseCode[exercise.id] ?? ""}
+                    onToggle={(value) => onToggleExercise(exercise.id, value)}
+                    onCode={(code) => onExerciseCode(exercise.id, code)}
+                  />
+                ))}
+              </ul>
             </section>
           )}
 

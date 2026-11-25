@@ -13,6 +13,8 @@ import type { DayProgress } from "@/lib/types";
 const watched = (over: Partial<DayProgress> = {}): DayProgress => ({
   watched: true,
   projectDone: false,
+  exercisesDone: [],
+  exerciseCode: {},
   notes: "",
   repoUrl: "",
   lectureUrl: "",

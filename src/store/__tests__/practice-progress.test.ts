@@ -153,3 +153,100 @@ describe("problem progress", () => {
     expect(useProgress.getState().problems).toEqual({});
   });
 });
+
+describe("complexity notes", () => {
+  beforeEach(() => {
+    useProgress.getState().resetAll();
+  });
+
+  it("stores time and space independently", () => {
+    const { setProblemComplexity } = useProgress.getState();
+    setProblemComplexity(SLUG, "time", "O(n)");
+    setProblemComplexity(SLUG, "space", "O(1)");
+    const entry = useProgress.getState().problems[SLUG];
+    expect(entry.timeComplexity).toBe("O(n)");
+    expect(entry.spaceComplexity).toBe("O(1)");
+  });
+
+  it("does not disturb one when the other is edited", () => {
+    const { setProblemComplexity } = useProgress.getState();
+    setProblemComplexity(SLUG, "time", "O(n log n)");
+    setProblemComplexity(SLUG, "space", "O(n)");
+    setProblemComplexity(SLUG, "time", "O(n)");
+    expect(useProgress.getState().problems[SLUG].spaceComplexity).toBe("O(n)");
+  });
+
+  it("survives a solve and a round trip through export", () => {
+    const store = useProgress.getState();
+    store.setProblemComplexity(SLUG, "time", "O(n)");
+    store.setProblemStatus(SLUG, "solved");
+    const exported = useProgress.getState().exportState();
+    useProgress.getState().resetAll();
+    useProgress.getState().importState(exported);
+    expect(useProgress.getState().problems[SLUG].timeComplexity).toBe("O(n)");
+  });
+});
+
+describe("course exercises", () => {
+  beforeEach(() => {
+    useProgress.getState().resetAll();
+  });
+
+  it("ticks an exercise on and back off", () => {
+    const { toggleExercise } = useProgress.getState();
+    toggleExercise(9, "9-2");
+    expect(useProgress.getState().course[9].exercisesDone).toEqual(["9-2"]);
+    toggleExercise(9, "9-2");
+    expect(useProgress.getState().course[9].exercisesDone).toEqual([]);
+  });
+
+  it("keeps several exercises for one day", () => {
+    const { toggleExercise } = useProgress.getState();
+    toggleExercise(9, "9-1");
+    toggleExercise(9, "9-3");
+    expect(useProgress.getState().course[9].exercisesDone).toEqual([
+      "9-1",
+      "9-3",
+    ]);
+  });
+
+  it("credits finishing one to today's streak, but not un-ticking it", () => {
+    const { toggleExercise } = useProgress.getState();
+    toggleExercise(9, "9-1");
+    const after = useProgress.getState().dayLogs[dayKey()].resources;
+    toggleExercise(9, "9-1");
+    expect(useProgress.getState().dayLogs[dayKey()].resources).toBe(after);
+  });
+
+  it("stores code per exercise without touching the others", () => {
+    const { setExerciseCode } = useProgress.getState();
+    setExerciseCode(9, "9-1", "print('a')");
+    setExerciseCode(9, "9-2", "print('b')");
+    const entry = useProgress.getState().course[9];
+    expect(entry.exerciseCode["9-1"]).toBe("print('a')");
+    expect(entry.exerciseCode["9-2"]).toBe("print('b')");
+  });
+
+  it("keeps exercise work when the day is marked watched", () => {
+    const store = useProgress.getState();
+    store.setExerciseCode(9, "9-1", "print('a')");
+    store.toggleExercise(9, "9-1");
+    store.setDayWatched(9, true);
+    const entry = useProgress.getState().course[9];
+    expect(entry.watched).toBe(true);
+    expect(entry.exercisesDone).toEqual(["9-1"]);
+    expect(entry.exerciseCode["9-1"]).toBe("print('a')");
+  });
+
+  it("round-trips exercises through export and import", () => {
+    const store = useProgress.getState();
+    store.toggleExercise(9, "9-1");
+    store.setExerciseCode(9, "9-1", "print('a')");
+    const exported = useProgress.getState().exportState();
+    useProgress.getState().resetAll();
+    useProgress.getState().importState(exported);
+    const entry = useProgress.getState().course[9];
+    expect(entry.exercisesDone).toEqual(["9-1"]);
+    expect(entry.exerciseCode["9-1"]).toBe("print('a')");
+  });
+});

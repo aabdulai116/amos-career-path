@@ -13,7 +13,7 @@ Progress lives in `localStorage`. Content lives in typed data files in the repo.
 There is no backend.
 
 ```
-TypeScript · Python · C++ · WebAssembly · 311 unit tests · 72 C++ assertions
+TypeScript · Python · C++ · WebAssembly · 344 unit tests · 72 C++ assertions
 ```
 
 ![The Atlas, filtered to the Quant Trader path](docs/screenshots/atlas.jpg)
@@ -57,14 +57,30 @@ skills with no link attached.
 ### 100 Days of Code tracker
 ![The course tracker](docs/screenshots/course.jpg)
 
-Dr. Angela Yu's bootcamp as a tracker — all 102 sections with lecture counts and
-run times. Watch on Udemy, come back, record the day. **Every one of the 100 days
-also carries a practice project of its own**, deliberately different from the
-course's own build: day 7 is Hangman in the course, so the practice build is a
-category word-guess; day 22 is Pong, so the practice build is Breakout. Each has a
-repo field, so a finished project becomes a proof-of-work entry.
+The structure of Dr. Angela Yu's 100 Days of Code — section titles, lecture
+counts and run times — as something to tick off. You watch on Udemy and record
+the day here. None of the course's content is reproduced; this is a tracker, not
+a mirror.
 
-Only the course's structure is here. None of its content is reproduced.
+Three things it adds on top:
+
+**A priority on every day.** Each of the 102 days is marked core, useful or
+skim, with a line saying why, judged against where I am going rather than
+against the teaching. A day can be excellent and still be a detour — turtle
+graphics is lovely and I will never use it again. The panel totals the hours
+left in each class, so "16 hours of this course can be watched at speed" is a
+number I can act on, and it points at the next core day rather than just the
+next day.
+
+**205 practice exercises, two or three per day.** Short drills for straight
+after the lectures — the project for a day takes an evening, these take ten
+minutes and tell you whether it landed. Core days get three, skim days get one.
+Most run in the page; the ones needing a window, a browser or the network say so
+plainly instead of failing confusingly.
+
+**A Python editor on each runnable exercise.** The same CPython 3.14 as the
+practice page, so `import pandas` genuinely works — the packages Pyodide ships
+are fetched on demand the first time something imports them.
 
 ### Order book lab — C++ compiled to WebAssembly
 ![The order book lab](docs/screenshots/orderbook.jpg)
@@ -99,6 +115,11 @@ NeetCode's solution — the seven Premium problems link to the free mirror inste
 
 Two things make it more than a checklist:
 
+**Time and space complexity on every problem.** Two free-text fields rather
+than a picker, because half the value is having to decide, and an amortised or
+average-case answer does not fit a dropdown. Once written they show on the
+collapsed row, which is what a revision pass actually reads.
+
 **A spaced review queue.** Tracking attempts and hints is only worth doing if
 something uses them. A problem you needed the walkthrough for comes back in a
 week, a second-sitting solve in three, a clean first solve in six. Most overdue
@@ -132,7 +153,7 @@ inline confirm.
 | Engine | C++20 → WebAssembly via Emscripten and embind |
 | Python | Pyodide 314.0.8 (CPython 3.14 → WebAssembly), in a Web Worker |
 | State | Zustand, persisted to `localStorage` |
-| Tests | Vitest (311) and a dependency-free C++ runner (72 assertions) |
+| Tests | Vitest (344) and a dependency-free C++ runner (72 assertions) |
 | Deploy | Vercel |
 
 ## What this project demonstrates

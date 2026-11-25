@@ -29,6 +29,8 @@ const solved = (over: Partial<ProblemProgress> = {}): ProblemProgress => ({
   attempts: 1,
   minutes: 30,
   notes: "",
+  timeComplexity: "",
+  spaceComplexity: "",
   solution: "",
   usedHint: false,
   solvedAt: "2026-01-01T00:00:00.000Z",

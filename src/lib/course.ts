@@ -1,4 +1,9 @@
-import type { CourseDay, CourseTrack, DayProgress } from "@/lib/types";
+import type {
+  CourseDay,
+  CourseTrack,
+  DayPriority,
+  DayProgress,
+} from "@/lib/types";
 
 export type CourseProgressMap = Record<string, DayProgress | undefined>;
 
@@ -127,3 +132,117 @@ export const courseProofs = (
       repoUrl: dayProgress(progress, day.day)?.repoUrl ?? "",
     }))
     .sort((a, b) => b.day.day - a.day.day);
+
+/* ------------------------------------------------- priority and exercises */
+
+export const PRIORITY_ORDER: DayPriority[] = ["core", "useful", "skim"];
+
+export const PRIORITY_LABEL: Record<DayPriority, string> = {
+  core: "Core",
+  useful: "Useful",
+  skim: "Skim",
+};
+
+export const PRIORITY_BLURB: Record<DayPriority, string> = {
+  core: "Slow down. You will use this in interviews or in the job.",
+  useful: "Worth the time once, not worth polishing.",
+  skim: "Watch at speed. Build it if you enjoy it, then move on.",
+};
+
+/**
+ * Only "core" is coloured. The question this answers is "where do I slow
+ * down?", and one highlighted class answers it faster than three competing
+ * hues would. The word is always rendered beside it.
+ */
+export const PRIORITY_COLOR: Record<DayPriority, string> = {
+  core: "var(--accent)",
+  useful: "var(--muted)",
+  skim: "var(--muted)",
+};
+
+export const dayExercises = (
+  day: CourseDay,
+  progress: CourseProgressMap,
+): { done: number; total: number } => {
+  const entry = dayProgress(progress, day.day);
+  return {
+    done: day.exercises.filter((e) => entry?.exercisesDone.includes(e.id))
+      .length,
+    total: day.exercises.length,
+  };
+};
+
+export const isExerciseDone = (
+  progress: CourseProgressMap,
+  day: number,
+  exerciseId: string,
+): boolean =>
+  dayProgress(progress, day)?.exercisesDone.includes(exerciseId) ?? false;
+
+export const exerciseCode = (
+  progress: CourseProgressMap,
+  day: number,
+  exerciseId: string,
+): string => dayProgress(progress, day)?.exerciseCode[exerciseId] ?? "";
+
+export interface ExerciseTotals {
+  done: number;
+  total: number;
+  percent: number;
+}
+
+export const exerciseTotals = (
+  days: CourseDay[],
+  progress: CourseProgressMap,
+): ExerciseTotals => {
+  const counts = days.map((day) => dayExercises(day, progress));
+  const done = counts.reduce((n, c) => n + c.done, 0);
+  const total = counts.reduce((n, c) => n + c.total, 0);
+  return {
+    done,
+    total,
+    percent: total === 0 ? 0 : Math.round((done / total) * 1000) / 10,
+  };
+};
+
+export interface PrioritySummary {
+  priority: DayPriority;
+  total: number;
+  watched: number;
+  /** Run time of the unwatched days in this class, in hours. */
+  hoursRemaining: number;
+}
+
+/**
+ * The number that makes the priorities actionable: how much of the course is
+ * left in each class. Skimmable hours are hours you can spend somewhere else.
+ */
+export const prioritySummaries = (
+  days: CourseDay[],
+  progress: CourseProgressMap,
+): PrioritySummary[] =>
+  PRIORITY_ORDER.map((priority) => {
+    const members = days.filter((d) => d.priority === priority);
+    const minutesLeft = members
+      .filter((d) => !dayProgress(progress, d.day)?.watched)
+      .reduce((n, d) => n + d.minutes, 0);
+    return {
+      priority,
+      total: members.length,
+      watched: members.filter((d) => dayProgress(progress, d.day)?.watched)
+        .length,
+      hoursRemaining: Math.round((minutesLeft / 60) * 10) / 10,
+    };
+  });
+
+/** The next day that is worth real attention, skipping what you can skim. */
+export const nextCoreDay = (
+  days: CourseDay[],
+  progress: CourseProgressMap,
+): CourseDay | null =>
+  days.find(
+    (d) =>
+      d.day <= 100 &&
+      d.priority === "core" &&
+      !dayProgress(progress, d.day)?.watched,
+  ) ?? null;

@@ -85,6 +85,12 @@ export const isSolved = (
   slug: string,
 ): boolean => progress[slug]?.status === "solved";
 
+/** Both halves written down; one without the other is half an answer. */
+export const hasComplexity = (entry: ProblemProgress | undefined): boolean =>
+  entry !== undefined &&
+  entry.timeComplexity.trim() !== "" &&
+  entry.spaceComplexity.trim() !== "";
+
 export interface PracticeStats {
   total: number;
   solved: number;
@@ -98,6 +104,8 @@ export interface PracticeStats {
   minutesLogged: number;
   /** Solved without a hint on the first sitting. */
   cleanSolves: number;
+  /** Solved but with no complexity written down - the gap before a revision. */
+  missingComplexity: number;
   /** The next unsolved problem in curriculum order, or null when done. */
   nextUp: Problem | null;
 }
@@ -131,6 +139,8 @@ export const practiceStats = (
       const entry = progress[p.slug];
       return entry !== undefined && !entry.usedHint && entry.attempts <= 1;
     }).length,
+    missingComplexity: solved.filter((p) => !hasComplexity(progress[p.slug]))
+      .length,
     nextUp: list.find((p) => progress[p.slug] === undefined) ?? null,
   };
 };

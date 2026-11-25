@@ -40,13 +40,12 @@ const boot = async () => {
     pyodide = await loadPyodide({ indexURL: INDEX_URL });
 
     // Stream output as it happens, so a long loop shows progress rather than
-    // dumping everything at the end.
-    pyodide.setStdout({
-      batched: (text) => post({ type: "stdout", id: currentId, text }),
-    });
-    pyodide.setStderr({
-      batched: (text) => post({ type: "stdout", id: currentId, text }),
-    });
+    // dumping everything at the end. batched() hands over a flushed line with
+    // its newline already stripped, so it has to go back on - without it the
+    // whole run arrives as one unreadable paragraph.
+    const line = (text) => post({ type: "stdout", id: currentId, text: `${text}\n` });
+    pyodide.setStdout({ batched: line });
+    pyodide.setStderr({ batched: line });
 
     post({ type: "ready", version: pyodide.version });
   } catch (error) {
@@ -75,6 +74,16 @@ self.onmessage = async (event) => {
   const started = performance.now();
 
   try {
+    // Pull in whatever the code imports - numpy, pandas, matplotlib and the
+    // rest ship with Pyodide but are not loaded until something asks, so the
+    // first `import pandas` costs a download and every later one is free.
+    // Its progress goes to the status line, not to stdout: the loader's
+    // chatter is not the program's output and should not look like it.
+    await pyodide.loadPackagesFromImports(message.code, {
+      messageCallback: (stage) => post({ type: "status", stage }),
+      errorCallback: (stage) => post({ type: "status", stage }),
+    });
+
     // runPythonAsync so top-level await works, and so an import of a bundled
     // package resolves rather than throwing.
     const value = await pyodide.runPythonAsync(message.code);

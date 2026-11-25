@@ -5,7 +5,7 @@ import { CircleCheck, Flame, History, Target, Timer } from "lucide-react";
 import { MeterList } from "@/components/dashboard/MeterList";
 import { StatTile } from "@/components/dashboard/StatTile";
 import { ProblemRow } from "@/components/practice/ProblemRow";
-import { PythonProvider } from "@/components/practice/PythonProvider";
+import { PythonProvider } from "@/components/python/PythonProvider";
 import {
   DIFFICULTY_COLOR,
   DIFFICULTY_ORDER,
@@ -42,6 +42,7 @@ export function PracticeTracker() {
   const setProblemNotes = useProgress((s) => s.setProblemNotes);
   const setProblemSolution = useProgress((s) => s.setProblemSolution);
   const setProblemHint = useProgress((s) => s.setProblemHint);
+  const setProblemComplexity = useProgress((s) => s.setProblemComplexity);
 
   const [filters, setFilters] = useState<ProblemFilters>(emptyFilters);
 
@@ -117,7 +118,11 @@ export function PracticeTracker() {
           <StatTile
             label="Clean first solves"
             value={ready ? String(stats.cleanSolves) : "—"}
-            sub="no walkthrough, one sitting"
+            sub={
+              ready && stats.missingComplexity > 0
+                ? `${stats.missingComplexity} solved without a Big-O noted`
+                : "no walkthrough, one sitting"
+            }
             icon={<Flame className="size-3.5" aria-hidden />}
           />
           <StatTile
@@ -341,6 +346,9 @@ export function PracticeTracker() {
                       setProblemSolution(problem.slug, solution)
                     }
                     onHint={(usedHint) => setProblemHint(problem.slug, usedHint)}
+                    onComplexity={(kind, value) =>
+                      setProblemComplexity(problem.slug, kind, value)
+                    }
                   />
                 ))}
               </ul>

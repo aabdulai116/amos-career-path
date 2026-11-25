@@ -72,6 +72,22 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 - [x] Depth ladder, live stats, order entry, trade tape, imbalance bar
 - [x] Market-making game on top of the engine — quote, get filled, manage inventory, scored on adverse selection
 
+### Phase 11 — course practice and priorities, shipped
+- [x] A priority on all 102 days — core, useful or skim — each with a line on
+      why, judged against software engineering, AI and quant
+- [x] Hours remaining per priority class, and a "next core day" pointer, so the
+      signal is actionable rather than decorative
+- [x] Filter the day list by priority
+- [x] 205 practice exercises, two or three per day: core days get three, skim
+      days get one
+- [x] A Python editor on every runnable exercise, sharing the practice page's
+      interpreter; packages load on demand so pandas, NumPy, matplotlib,
+      scikit-learn and sqlite3 all work
+- [x] Exercises that need a window, a browser or the network are marked, not
+      faked
+- [x] Time and space complexity recorded per NeetCode problem, shown on the
+      collapsed row for revision
+
 ### Phase 6 — 100 Days of Code tracker
 - [x] All 102 sections as data — titles, lecture counts, run times (sums to 57hr ✓)
 - [x] Mark a day watched, with "up next" and progress by track
@@ -110,7 +126,8 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 - [x] Every problem badged **Blind 75** where it is one, and the whole list
       switchable between NeetCode 150 and Blind 75 — the stats rescope with it
 - [x] Per-problem: notes, your own solution, sittings, minutes, a
-      "needed the walkthrough" flag, and links to NeetCode's video and solution
+      "needed the walkthrough" flag, time and space complexity, and links to
+      NeetCode's video and solution
 - [x] **In-browser code runner** — Pyodide, real CPython 3.14 via WebAssembly,
       in a Web Worker, no backend
 - [x] **Spaced review queue** — a problem you needed the walkthrough for comes

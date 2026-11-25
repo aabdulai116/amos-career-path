@@ -84,6 +84,37 @@ export interface CourseProject {
   brief: string;
 }
 
+/**
+ * How much of my attention a day deserves, judged against where I am going:
+ * software engineering, AI and quant. Not a judgement on the teaching - a day
+ * can be delightful and still be a detour.
+ *
+ * core   - slow down. You will use this in interviews or in the job itself.
+ * useful - worth the time once, not worth polishing.
+ * skim   - watch at speed. Build it if you enjoy it, then move on.
+ */
+export type DayPriority = "core" | "useful" | "skim";
+
+/**
+ * A short drill for a day, to be done after the lectures. Separate from the
+ * day's project: a project takes an evening, an exercise takes ten minutes and
+ * answers "did that actually land?".
+ */
+export interface CourseExercise {
+  /** Unique across the course: `${day}-${n}`. */
+  id: string;
+  title: string;
+  prompt: string;
+  /**
+   * False when it needs a GUI, a browser, a server or the network. Those are
+   * built on your own machine; the in-page interpreter has no screen and no
+   * socket, and pretending otherwise would waste your time.
+   */
+  runnable: boolean;
+  /** Pre-filled code, for the exercises that hand you something to fix. */
+  starter: string | null;
+}
+
 export interface CourseDay {
   day: number;
   /** Udemy section number, which matches the day for this course. */
@@ -93,11 +124,19 @@ export interface CourseDay {
   lectures: number;
   minutes: number;
   project: CourseProject | null;
+  priority: DayPriority;
+  /** One line on why this day earns its time, or why it does not. */
+  priorityNote: string;
+  exercises: CourseExercise[];
 }
 
 export interface DayProgress {
   watched: boolean;
   projectDone: boolean;
+  /** Ids of the day's exercises I have finished. */
+  exercisesDone: string[];
+  /** What I wrote for each exercise, keyed by exercise id. */
+  exerciseCode: Record<string, string>;
   notes: string;
   /** Where the practice project lives. */
   repoUrl: string;
@@ -165,6 +204,13 @@ export interface ProblemProgress {
   /** Minutes across every sitting. */
   minutes: number;
   notes: string;
+  /**
+   * The complexity I settled on, in my own words - "O(n)", "O(n log n)".
+   * Free text rather than a picker: half the value is having to write it down,
+   * and an amortised or average-case answer does not fit a dropdown.
+   */
+  timeComplexity: string;
+  spaceComplexity: string;
   /** My own solution, kept so I can reread it the week before an interview. */
   solution: string;
   /** True when I needed the walkthrough. Drives the review queue. */
