@@ -12,6 +12,9 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      // Emscripten's generated loader; it is build output, not source.
+      "public/engine/**",
+      "engine/build/**",
     ],
   },
 ];
