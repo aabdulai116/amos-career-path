@@ -309,3 +309,25 @@ signal.
 **Verified in the browser, not just in tests.** A market buy of 10 against a
 seeded book filled at 100.05, the best ask, leaving the rest of that level
 resting.
+
+## Phase 8 — The Learn panel
+
+**Lesson content is data, not JSX.**
+`src/lib/orderbook-lessons.ts` holds the explainer so it can be tested. Two of
+those tests are worth more than they look: one checks the sweep demo really is
+bigger than the cheapest level but smaller than everything it can reach, so it
+genuinely demonstrates a partial sweep; the other checks the queue demo has two
+equal orders at one price and a taker that clears exactly one, so the survivor
+is visible. If someone edits the numbers and breaks the lesson, the build says so.
+
+**The demos drive the real engine.**
+Nothing in the panel is a mock-up. Pressing "Sweep two levels" clears the book,
+lays out the setup and sends the order through the same C++ that everything else
+uses, then shows the fills it got back. If the prose and the engine ever
+disagreed, the panel would show the disagreement rather than hide it.
+
+**A setState-during-render bug, found only by running it.**
+The first version called `onRunDemo(demo)` inside `setRan`'s updater function.
+React runs updaters during render, so the demo was executing — and setting state
+on the parent — mid-render. Typecheck and lint both passed; only the browser
+console caught it. Running the demo first and storing the plain result fixes it.
