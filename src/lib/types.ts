@@ -71,7 +71,12 @@ export type SkillStatus = "locked" | "available" | "in_progress" | "done";
 
 /** Everything the user has typed or checked for one skill. */
 export interface SkillProgress {
-  status: Exclude<SkillStatus, "locked" | "available">;
+  /**
+   * Absent until the skill is explicitly started or finished. Jotting a note or
+   * ticking a resource records the activity without claiming a status, so a
+   * skill never silently reports progress I did not declare.
+   */
+  status?: "in_progress" | "done";
   notes: string;
   proofUrl: string;
   hoursLogged: number;

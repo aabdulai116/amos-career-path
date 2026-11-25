@@ -84,6 +84,20 @@ describe("computeStatuses", () => {
     expect(statuses.c).toBe("done");
   });
 
+  it("ignores an entry that records activity but claims no status", () => {
+    // Ticking a resource or typing a note creates an entry with no status.
+    const touched: SkillProgress = {
+      notes: "started reading",
+      proofUrl: "",
+      hoursLogged: 2,
+      completedAt: null,
+      resourcesWatched: ["x"],
+    };
+    const statuses = computeStatuses(chain, { a: touched, c: touched });
+    expect(statuses.a).toBe("available");
+    expect(statuses.c).toBe("locked");
+  });
+
   it("isUnlocked agrees with the derived status", () => {
     const progress: ProgressMap = { a: done() };
     expect(isUnlocked(chain[1], progress)).toBe(true);
