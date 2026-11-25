@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GitBranch, LayoutGrid, Settings } from "lucide-react";
+import { GitBranch, GraduationCap, LayoutGrid, Settings } from "lucide-react";
 
 const links = [
   { href: "/", label: "Atlas", icon: GitBranch },
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
+  { href: "/course", label: "Course", icon: GraduationCap },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
