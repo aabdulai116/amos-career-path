@@ -7,7 +7,7 @@ work it describes, so the checkbox and the code can never drift apart.
 **Status key:** `[x]` shipped · `[~]` partly done · `[ ]` not started ·
 `[!]` blocked or needs a decision · `[–]` declined, with the reason
 
-Last updated: 25 November 2026 · 37 commits · 197 tests · branch `main`
+Last updated: 25 November 2026 · 38 commits · 197 tests · branch `main`
 
 ---
 
@@ -134,6 +134,95 @@ Last updated: 25 November 2026 · 37 commits · 197 tests · branch `main`
       **Replaced by** the Phase 6 tracker, which holds structure, your notes, your
       projects and your progress, and sends you to Udemy to watch.
 - [–] **Scraping LeetCode Premium company tags.** Paywalled data; see the route above.
+
+---
+
+## Skills this project is built to demonstrate
+
+The aim is breadth that is **load-bearing** — every technology here is present
+because a feature genuinely needs it, not because it looks good in a list. An
+interviewer who asks "why Postgres here?" should get an answer about the problem,
+not about the CV.
+
+### Proven today
+
+| Skill area | Where it shows |
+|---|---|
+| TypeScript, `strict`, no `any` | 9,700 lines across 49 files |
+| React 19 / Next.js App Router | Three routed pages, server and client split |
+| **Graph algorithms** | Cycle detection, topological sort, transitive closure, prerequisite closure — all hand-written and tested |
+| **Layout algorithms** | dagre for rank, custom greedy row-packing for domain bands |
+| Data visualisation + a11y | Palette validated against CVD and contrast, not eyeballed |
+| **Parser writing** | Markdown subset parsed to a tree, no `dangerouslySetInnerHTML` |
+| Security thinking | href scheme allowlist, XSS-safe rendering by construction |
+| State & persistence | Zustand, schema validation on import, forward-compatible state |
+| Testing | 197 unit tests, including data-integrity tests that fail the build |
+| Tooling / DX | Link checker that distinguishes "embedding disabled" from "dead" |
+
+### The gap
+
+The repo is **99.2% TypeScript**. For someone targeting software engineering, AI
+*and* quant, a single-language frontend project tells one third of the story. The
+three additions below each close a gap **and** are needed by the roadmap anyway.
+
+### Planned, load-bearing additions
+
+**1. Work-authorisation classifier — Python, NLP, data engineering** *(AI gap)*
+
+I measured the obvious approach and it failed: 5,056 of 5,070 active listings
+leave the sponsorship field as `Other`. The signal only exists in the job
+description prose. So the CPT filter has to read the text — fetch the posting,
+extract work-authorisation statements, classify into *citizenship required /
+no sponsorship / CPT acceptable / silent*, and report a confidence.
+
+This is the strongest story in the whole project: the naive approach was tried,
+*measured*, shown not to work, and replaced with something that does.
+
+Carries: Python, text classification, evaluation against a hand-labelled set,
+precision/recall trade-offs where a false negative costs a real opportunity.
+
+**2. Ingestion worker — Python, scheduling, data pipeline** *(backend gap)*
+
+Poll the feed, normalise, dedupe against what has been seen, detect genuinely new
+postings, write to a database, trigger notifications. Idempotent, because a cron
+job that double-notifies is worse than one that misses.
+
+Carries: Python, Postgres schema design and indexing, cron, idempotency, change
+detection, structured logging, Docker for the worker.
+
+**3. Order-book matching engine — C++ compiled to WebAssembly** *(quant gap)*
+
+The Quant Developer path on the Atlas is Low Latency C++ and Market
+Microstructure, and the project currently proves neither. A price-time priority
+matching engine in C++, compiled to WASM, running in the browser, with a
+visualiser and a market-making game on top.
+
+It is load-bearing: the engine has to process order flow fast enough to stay
+smooth, which is the actual reason to reach for C++ and WASM. It is also already
+on the plan — Day 89 and Day 95 of the course tracker.
+
+Carries: modern C++, WebAssembly, performance measurement, and market
+microstructure as a *demonstrated* understanding rather than a line on a CV.
+
+**4. Pyodide code runner — WebAssembly, sandboxing** *(already planned)*
+
+Real CPython in the browser for the LeetCode section, with a test harness.
+
+**5. CI/CD — GitHub Actions** *(cheap, visible)*
+
+Run typecheck, lint, tests and the link checker on every push. A green badge on
+the README is the single clearest signal that the tests are real.
+
+### What this makes the language bar say
+
+TypeScript · **Python** · **C++** — three languages, each earning its place.
+That is the diversity a recruiter sees before reading a word.
+
+### Presentation
+- [ ] Architecture section in the README with a diagram — breadth nobody notices is breadth wasted
+- [ ] Consider a small monorepo (`apps/web`, `services/ingest`, `packages/engine`)
+      so the structure itself shows the range
+- [ ] CI badge, test count, and a one-line "what this demonstrates" at the top
 
 ---
 
