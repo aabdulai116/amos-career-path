@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Background,
   BackgroundVariant,
@@ -38,8 +39,15 @@ function AtlasCanvas() {
   const { setCenter } = useReactFlow();
   const [query, setQuery] = useState("");
   const [selectedDomainIds, setSelectedDomainIds] = useState<string[]>([]);
-  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  // null = nothing chosen here yet, so a ?skill= link decides. Any open or close
+  // in this session takes over from the URL.
+  const [selection, setSelection] = useState<{ id: string | null } | null>(null);
   const lastFocused = useRef<HTMLElement | null>(null);
+
+  const searchParams = useSearchParams();
+  const linked = searchParams.get("skill");
+  const linkedSkillId = linked !== null && skillById[linked] ? linked : null;
+  const selectedSkillId = selection ? selection.id : linkedSkillId;
 
   useHydrateProgress();
   const progress = useProgress((s) => s.skills);
@@ -72,13 +80,26 @@ function AtlasCanvas() {
 
   const openSkill = useCallback((id: string) => {
     lastFocused.current = document.activeElement as HTMLElement | null;
-    setSelectedSkillId(id);
+    setSelection({ id });
   }, []);
 
   const closePanel = useCallback(() => {
-    setSelectedSkillId(null);
+    setSelection({ id: null });
     lastFocused.current?.focus();
   }, []);
+
+  // Centre the map on a skill arrived at from a /?skill= link. setCenter talks
+  // to React Flow, not to React state, so this stays a plain side effect.
+  useEffect(() => {
+    if (linkedSkillId === null) return;
+    const position = layout.positions[linkedSkillId];
+    if (position) {
+      setCenter(position.x + NODE_WIDTH / 2, position.y + NODE_HEIGHT / 2, {
+        zoom: 1,
+        duration: 450,
+      });
+    }
+  }, [linkedSkillId, setCenter]);
 
   const jumpToSkill = useCallback(
     (id: string) => {
@@ -228,7 +249,7 @@ function AtlasCanvas() {
           onNodeClick={(_, node) => {
             if (node.type === "skill") openSkill(node.id);
           }}
-          onPaneClick={() => setSelectedSkillId(null)}
+          onPaneClick={() => setSelection({ id: null })}
           className="bg-[var(--background)]"
         >
           <Background
