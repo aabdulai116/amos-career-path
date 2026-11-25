@@ -106,6 +106,73 @@ export interface DayProgress {
   completedAt: string | null;
 }
 
+/* ----------------------------------------------- LeetCode / NeetCode practice */
+
+/**
+ * NeetCode's eighteen pattern groups, in the order neetcode.io lists them. The
+ * order is the curriculum: each group assumes the ones above it.
+ */
+export type ProblemPattern =
+  | "Arrays & Hashing"
+  | "Two Pointers"
+  | "Sliding Window"
+  | "Stack"
+  | "Binary Search"
+  | "Linked List"
+  | "Trees"
+  | "Tries"
+  | "Heap / Priority Queue"
+  | "Backtracking"
+  | "Graphs"
+  | "Advanced Graphs"
+  | "1-D Dynamic Programming"
+  | "2-D Dynamic Programming"
+  | "Greedy"
+  | "Intervals"
+  | "Math & Geometry"
+  | "Bit Manipulation";
+
+export type Difficulty = "Easy" | "Medium" | "Hard";
+
+/**
+ * One problem in the NeetCode 150. Every field comes from NeetCode's published
+ * problem data - see scripts/sync-problems.ts. Nothing here is hand-typed, so
+ * no slug, video id or link is guesswork.
+ */
+export interface Problem {
+  /** LeetCode slug, e.g. "two-sum". URLs are built by problemUrl(). */
+  slug: string;
+  title: string;
+  pattern: ProblemPattern;
+  difficulty: Difficulty;
+  /** Also one of the Blind 75. The other 75 are NeetCode's additions. */
+  blind75: boolean;
+  /** YouTube id of NeetCode's walkthrough. */
+  video: string;
+  /** Solution file stem in neetcode-gh/leetcode, e.g. "0217-contains-duplicate". */
+  solutionPath: string;
+  /** LeetCode gates seven of these; this is the free mirror to solve them on. */
+  freeUrl: string | null;
+}
+
+/** Explicit, unlike skills: a problem you have not opened simply has no entry. */
+export type ProblemStatus = "attempted" | "solved";
+
+export interface ProblemProgress {
+  status: ProblemStatus;
+  /** Sittings, not submissions. Incremented by hand when I come back to one. */
+  attempts: number;
+  /** Minutes across every sitting. */
+  minutes: number;
+  notes: string;
+  /** My own solution, kept so I can reread it the week before an interview. */
+  solution: string;
+  /** True when I needed the walkthrough. Drives the review queue. */
+  usedHint: boolean;
+  solvedAt: string | null;
+  lastAttemptAt: string | null;
+}
+
 export type SkillStatus = "locked" | "available" | "in_progress" | "done";
 
 /** Everything the user has typed or checked for one skill. */
@@ -137,6 +204,8 @@ export interface ProgressState {
   skills: Record<string, SkillProgress>;
   /** Keyed by day number as a string. */
   course: Record<string, DayProgress>;
+  /** Keyed by LeetCode slug. */
+  problems: Record<string, ProblemProgress>;
   customResources: CustomResource[];
   /** Keyed by YYYY-MM-DD. */
   dayLogs: Record<string, DayLog>;

@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:links": "tsx scripts/check-links.ts",
+    "sync:problems": "tsx scripts/sync-problems.ts",
     "test:engine": "make -C engine test",
     "build:engine": "make -C engine wasm"
   },

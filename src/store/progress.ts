@@ -6,6 +6,8 @@ import { dayKey } from "@/lib/dates";
 import type {
   CustomResource,
   DayProgress,
+  ProblemProgress,
+  ProblemStatus,
   ProgressState,
   SkillProgress,
 } from "@/lib/types";
@@ -21,6 +23,17 @@ const emptySkill = (): SkillProgress => ({
   resourcesWatched: [],
 });
 
+const emptyProblem = (): ProblemProgress => ({
+  status: "attempted",
+  attempts: 0,
+  minutes: 0,
+  notes: "",
+  solution: "",
+  usedHint: false,
+  solvedAt: null,
+  lastAttemptAt: null,
+});
+
 const emptyDay = (): DayProgress => ({
   watched: false,
   projectDone: false,
@@ -34,6 +47,7 @@ export const initialState: ProgressState = {
   version: 1,
   skills: {},
   course: {},
+  problems: {},
   customResources: [],
   dayLogs: {},
   settings: {
@@ -60,6 +74,12 @@ interface Actions {
   setDayNotes: (day: number, notes: string) => void;
   setDayRepoUrl: (day: number, url: string) => void;
   setDayLectureUrl: (day: number, url: string) => void;
+  /** NeetCode 150: record a sitting, a solve, or clear the problem. */
+  setProblemStatus: (slug: string, status: ProblemStatus | "reset") => void;
+  logAttempt: (slug: string, minutes: number) => void;
+  setProblemNotes: (slug: string, notes: string) => void;
+  setProblemSolution: (slug: string, solution: string) => void;
+  setProblemHint: (slug: string, usedHint: boolean) => void;
   setRecruitingDate: (iso: string) => void;
   setSelectedPath: (pathId: string | null) => void;
   importState: (raw: unknown) => { ok: true } | { ok: false; error: string };
@@ -110,6 +130,11 @@ export const parseProgressState = (
       course:
         typeof value.course === "object" && value.course !== null
           ? value.course
+          : {},
+      // Exports written before the practice tracker existed simply have none.
+      problems:
+        typeof value.problems === "object" && value.problems !== null
+          ? value.problems
           : {},
       customResources: Array.isArray(value.customResources)
         ? value.customResources
@@ -283,6 +308,77 @@ export const useProgress = create<ProgressStore>()(
           },
         })),
 
+      setProblemStatus: (slug, status) =>
+        set((state) => {
+          if (status === "reset") {
+            const next = { ...state.problems };
+            delete next[slug];
+            return { problems: next };
+          }
+          const existing = state.problems[slug] ?? emptyProblem();
+          const now = new Date().toISOString();
+          const solving = status === "solved";
+          return {
+            problems: {
+              ...state.problems,
+              [slug]: {
+                ...existing,
+                status,
+                // Opening a problem for the first time counts as one sitting,
+                // so a solve never lands on zero attempts.
+                attempts: Math.max(existing.attempts, 1),
+                solvedAt: solving ? (existing.solvedAt ?? now) : null,
+                lastAttemptAt: now,
+              },
+            },
+            // A solve is activity for the streak; time is logged separately,
+            // because only I know how long I actually sat with it.
+            dayLogs: solving ? touchDay(state.dayLogs, 0, 1) : state.dayLogs,
+          };
+        }),
+
+      logAttempt: (slug, minutes) =>
+        set((state) => {
+          if (!Number.isFinite(minutes) || minutes <= 0) return state;
+          const existing = state.problems[slug] ?? emptyProblem();
+          return {
+            problems: {
+              ...state.problems,
+              [slug]: {
+                ...existing,
+                attempts: existing.attempts + 1,
+                minutes: existing.minutes + Math.round(minutes),
+                lastAttemptAt: new Date().toISOString(),
+              },
+            },
+            dayLogs: touchDay(state.dayLogs, minutes / 60, 0),
+          };
+        }),
+
+      setProblemNotes: (slug, notes) =>
+        set((state) => ({
+          problems: {
+            ...state.problems,
+            [slug]: { ...(state.problems[slug] ?? emptyProblem()), notes },
+          },
+        })),
+
+      setProblemSolution: (slug, solution) =>
+        set((state) => ({
+          problems: {
+            ...state.problems,
+            [slug]: { ...(state.problems[slug] ?? emptyProblem()), solution },
+          },
+        })),
+
+      setProblemHint: (slug, usedHint) =>
+        set((state) => ({
+          problems: {
+            ...state.problems,
+            [slug]: { ...(state.problems[slug] ?? emptyProblem()), usedHint },
+          },
+        })),
+
       setRecruitingDate: (iso) =>
         set((state) => ({
           settings: { ...state.settings, recruitingDate: iso },
@@ -301,9 +397,24 @@ export const useProgress = create<ProgressStore>()(
       },
 
       exportState: () => {
-        const { version, skills, course, customResources, dayLogs, settings } =
-          get();
-        return { version, skills, course, customResources, dayLogs, settings };
+        const {
+          version,
+          skills,
+          course,
+          problems,
+          customResources,
+          dayLogs,
+          settings,
+        } = get();
+        return {
+          version,
+          skills,
+          course,
+          problems,
+          customResources,
+          dayLogs,
+          settings,
+        };
       },
 
       resetAll: () => set({ ...initialState }),
@@ -320,10 +431,19 @@ export const useProgress = create<ProgressStore>()(
         version,
         skills,
         course,
+        problems,
         customResources,
         dayLogs,
         settings,
-      }) => ({ version, skills, course, customResources, dayLogs, settings }),
+      }) => ({
+        version,
+        skills,
+        course,
+        problems,
+        customResources,
+        dayLogs,
+        settings,
+      }),
       onRehydrateStorage: () => (state) => state?.setHydrated(),
     },
   ),

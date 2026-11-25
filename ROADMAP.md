@@ -102,20 +102,32 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
       app stops being purely static. *Needs a decision on the stack.*
 - [ ] Saved / applied / rejected tracking per role
 
-### LeetCode & NeetCode
-- [ ] NeetCode section, by pattern, in NeetCode's own order
-- [ ] LeetCode section
-- [ ] Every problem badged **Blind 75** or **NeetCode 150** so you can see which
-      is which, exactly as you asked
-- [ ] Per-problem: your notes, your solution, attempt history, link out
-- [ ] **In-browser code runner** — Pyodide, real CPython via WebAssembly, no
-      backend, with a test harness so you see cases pass or fail
+### LeetCode & NeetCode — Phase 10, shipped
+- [x] All eighteen patterns, in NeetCode's own order, because the order is the
+      curriculum
+- [x] Every problem links out to LeetCode; the seven Premium ones link to the
+      free mirror NeetCode publishes instead
+- [x] Every problem badged **Blind 75** where it is one, and the whole list
+      switchable between NeetCode 150 and Blind 75 — the stats rescope with it
+- [x] Per-problem: notes, your own solution, sittings, minutes, a
+      "needed the walkthrough" flag, and links to NeetCode's video and solution
+- [x] **In-browser code runner** — Pyodide, real CPython 3.14 via WebAssembly,
+      in a Web Worker, no backend
+- [x] **Spaced review queue** — a problem you needed the walkthrough for comes
+      back in 7 days, a second-sitting solve in 21, a clean first solve in 45.
+      Most overdue first
+- [x] Filters: scope, status, difficulty, pattern, title search
+- [x] Data generated from NeetCode's own published problem file, so no slug or
+      video id is hand-typed — `npm run sync:problems`
 - [!] **Company tags** — LeetCode sells these as Premium, so I will not scrape
       them. Two routes: you tag as you go, or you point me at a public
       community dataset and I import it labelled as community-sourced.
-      *Needs your choice.*
-- [ ] Problem statements stay on LeetCode — that text is theirs, so each card
+      *Still needs your choice.*
+- [x] Problem statements stay on LeetCode — that text is theirs, so each row
       carries metadata plus your work, and a button to open the real thing
+- [ ] A test harness with per-problem cases. Deliberately not built: the real
+      cases live on LeetCode, and cases I invent only check my own assumptions.
+      The runner executes whatever you write, asserts included
 
 ### Opportunities
 - [ ] Insight days and spring/early-insight programmes
@@ -213,9 +225,10 @@ on the plan — Day 89 and Day 95 of the course tracker.
 Carries: modern C++, WebAssembly, performance measurement, and market
 microstructure as a *demonstrated* understanding rather than a line on a CV.
 
-**4. Pyodide code runner — WebAssembly, sandboxing** *(already planned)*
+**4. Pyodide code runner — WebAssembly, sandboxing** *(done, Phase 10)*
 
-Real CPython in the browser for the LeetCode section, with a test harness.
+Real CPython 3.14 in the browser for the practice page, in a Web Worker so a
+runaway loop can be killed without taking the tab with it.
 
 **5. CI/CD — GitHub Actions** *(cheap, visible)*
 
@@ -232,6 +245,7 @@ That is the diversity a recruiter sees before reading a word.
       screenshots of the course tracker, the order book and the game
 - [ ] Consider a small monorepo (`apps/web`, `services/ingest`, `packages/engine`)
       so the structure itself shows the range
+- [x] README and screenshots extended for the practice page (Phase 10)
 - [ ] CI badge, test count, and a one-line "what this demonstrates" at the top
 
 ---

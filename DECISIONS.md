@@ -366,3 +366,79 @@ question is the ratio, not the total.
 The score equalled spread captured exactly, which only happens when the position
 ends flat — and with a fixed 99.95/100.05 quote that is 5 ticks × 102 lots = 510.
 The accounting checks out by hand, which is the point of keeping it pure.
+
+## Phase 10 — LeetCode / NeetCode practice
+
+**The problem list is generated, not typed.** The NeetCode 150 is 150 LeetCode
+slugs and 150 YouTube ids. Typing those by hand means inventing URLs, and a slug
+one character out is a dead link that looks alive. NeetCode publishes the exact
+data that drives neetcode.io in their own repository, so `scripts/sync-problems.ts`
+fetches it and writes `src/data/problems.ts`. Every slug, pattern, difficulty and
+video id is theirs. The generator validates before it writes — 150 problems, 75
+Blind 75, the Blind 75 a subset of the 150, unique slugs, slug and video-id
+shapes, known patterns and difficulties — and exits non-zero rather than writing
+a partial file, so a change upstream fails loudly.
+
+**leetcode.com cannot be link-checked from Node.** It sits behind bot protection
+and answers a plain `curl` with a 403 challenge page. Getting around that is not
+something I will do, so `check:links` leaves these alone. The protection against
+a bad link is the generator instead: the slugs come from NeetCode rather than
+from me, and their shape is asserted in the tests.
+
+**The 150, not the 450.** NeetCode's full practice list is in the same file. The
+badges in the brief are about the 150, so that is what ships; widening it is one
+filter in the generator, called out in a comment there.
+
+**Difficulty is the only thing coloured.** Eighteen patterns is far past the
+point where a hue per category means anything, so the pattern meters share one
+accent and the name carries identity. Difficulty is three ordered values, and
+the steps `#35a56b` / `#ad7510` / `#dd4f7d` were picked by running the palette
+validator against the dark surface: all three inside OKLCH L 0.48–0.67, worst
+adjacent pair deutan ΔE 8.3 and normal-vision ΔE 17.3, every one over 3:1 on
+`--surface`. The word "Easy"/"Medium"/"Hard" is always rendered beside the
+colour, so difficulty is never colour alone.
+
+**No test harness, and no generated function stubs.** A per-problem test harness
+would have to invent cases, which only checks my own assumptions rather than
+LeetCode's. The runner executes exactly what is written, asserts included, and
+reports what printed. For the same reason the starter text is comments only: a
+guessed `def twoSum(self, nums, target)` that is subtly wrong looks authoritative
+and silently disagrees with the real signature. Paste the real one from LeetCode.
+
+**Python runs in a Web Worker, as an ES module.** Two reasons for the worker:
+the 12 MB interpreter would otherwise freeze the page while it loads, and an
+accidental `while True:` cannot be interrupted from inside CPython — the only
+reliable stop is to destroy the worker, which a background thread makes
+survivable. It is a module worker rather than a classic one because
+`importScripts()` cannot reach a cross-origin CDN; `import()` in a module worker
+can. Verified in the browser: both forms were tried, and only the module import
+loaded Pyodide.
+
+**The run timeout starts when the interpreter picks the code up.** The first
+version armed a 15-second timer when the page posted the code, so the very first
+run of a visit spent that budget downloading the interpreter and then reported
+an infinite loop. The worker now posts `started` immediately before executing,
+and the page swaps a 180-second boot budget for the 15-second run budget at that
+point. A boot failure says the download failed; only a run failure blames a loop.
+
+**Output printed before an exception is kept.** The first version replaced it
+with the traceback. What printed before the error is usually the clue to it, so
+the panel shows the output, a blank line, then the cleaned traceback — Pyodide's
+own frames stripped, and `File "<exec>", line 4` reduced to `line 4`.
+
+**Spaced review is derived from the record, not from memory.** Tracking attempts
+and a hint flag is only worth doing if something uses them. A solve comes back
+after 7 days if it needed the walkthrough or took more than two sittings, 21
+after a second-sitting solve, and 45 after a clean first solve; the queue sorts
+most-overdue first and breaks ties on curriculum order.
+
+**Pyodide 314.0.8, pinned.** Published 2026-11-13, the current stable release.
+Pyodide ships the interpreter, the standard library and the wasm as one versioned
+bundle, so a floating version would change Python itself under the page.
+
+**Verified in the browser, not only in tests.** A real solution to Contains
+Duplicate with two asserts printed `both cases pass` in 3 ms under Python
+314.0.8; a deliberate `ZeroDivisionError` printed `total 6` and then a clean
+three-line traceback; the code survived a full page reload; the Blind 75 switch
+rescoped all four stat tiles and the list to 75; and the page has no horizontal
+overflow at 375 px.

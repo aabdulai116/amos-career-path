@@ -13,7 +13,7 @@ Progress lives in `localStorage`. Content lives in typed data files in the repo.
 There is no backend.
 
 ```
-TypeScript · C++ · WebAssembly · 235 unit tests · 72 C++ assertions
+TypeScript · Python · C++ · WebAssembly · 311 unit tests · 72 C++ assertions
 ```
 
 ![The Atlas, filtered to the Quant Trader path](docs/screenshots/atlas.jpg)
@@ -88,6 +88,35 @@ where the profit comes from; others can see the true value and only deal when th
 quote is wrong. Scoring separates **spread captured** from **picked off**, because
 total P&L hides the trade-off that makes the job hard.
 
+### Pattern practice — the NeetCode 150, with Python in the browser
+![The practice page](docs/screenshots/practice.jpg)
+
+All eighteen NeetCode patterns in NeetCode's own order, because the order is the
+curriculum. Switch the whole page between the **NeetCode 150** and the **Blind
+75** and every stat rescopes with it. Per problem: notes, sittings, minutes, a
+"needed the walkthrough" flag, and links out to LeetCode, NeetCode's video and
+NeetCode's solution — the seven Premium problems link to the free mirror instead.
+
+Two things make it more than a checklist:
+
+**A spaced review queue.** Tracking attempts and hints is only worth doing if
+something uses them. A problem you needed the walkthrough for comes back in a
+week, a second-sitting solve in three, a clean first solve in six. Most overdue
+first.
+
+**Real Python, in the page.** Each problem has an editor running CPython 3.14
+compiled to WebAssembly via Pyodide — no backend, no account, no network round
+trip. It lives in a Web Worker so the 12 MB interpreter does not freeze the page
+while it loads and an accidental `while True:` can be killed without taking the
+tab with it. It is deliberately *not* a judge: there is no hidden test suite,
+because the real cases live on LeetCode and cases I invented would only check my
+own assumptions. You write the solution and the asserts; real CPython tells you
+the truth, and what you keep is a solution you have actually executed.
+
+The problem list is generated, never typed: `npm run sync:problems` reads
+NeetCode's own published problem file and writes `src/data/problems.ts`, so no
+slug or video id in this repo is a guess.
+
 ### Settings
 Editable recruiting date, export progress as JSON, import it back, reset with an
 inline confirm.
@@ -97,12 +126,13 @@ inline confirm.
 | | |
 |---|---|
 | Framework | Next.js 16 (App Router), React 19 |
-| Languages | TypeScript (`strict`, no `any`), C++20 |
+| Languages | TypeScript (`strict`, no `any`), C++20, Python (in the browser) |
 | Styling | Tailwind CSS v4, dark by default |
 | Graph | `@xyflow/react` 12, laid out with `dagre` |
 | Engine | C++20 → WebAssembly via Emscripten and embind |
+| Python | Pyodide 314.0.8 (CPython 3.14 → WebAssembly), in a Web Worker |
 | State | Zustand, persisted to `localStorage` |
-| Tests | Vitest (235) and a dependency-free C++ runner (72 assertions) |
+| Tests | Vitest (311) and a dependency-free C++ runner (72 assertions) |
 | Deploy | Vercel |
 
 ## What this project demonstrates
@@ -120,8 +150,15 @@ Written down because a repo should say what it is evidence of.
   elements, so no HTML string is ever built and hrefs are scheme-filtered
 - **Data visualisation** — palettes validated against colour-vision deficiency and
   contrast rather than eyeballed
+- **Concurrency in the browser** — a Web Worker running a second language, with a
+  message protocol, a boot budget separate from the run budget, and termination
+  as the only reliable way to stop a runaway loop
+- **Treating third-party data as a source** — 150 problems generated from
+  NeetCode's published file with the generator validating counts, subsets and id
+  shapes before it writes, rather than 150 hand-typed URLs
 - **Testing** — including data-integrity tests that fail the build if the skill
-  graph grows a cycle or a lesson stops demonstrating what it claims
+  graph grows a cycle, a lesson stops demonstrating what it claims, or the
+  problem list drifts out of curriculum order
 
 ## Getting started
 
@@ -146,6 +183,7 @@ Then open <http://localhost:3000>.
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
 | `npm run check:links` | Verify every resource URL still resolves |
+| `npm run sync:problems` | Regenerate the NeetCode 150 from NeetCode's published data |
 
 The compiled `.wasm` is committed, so the app runs without a C++ toolchain. You
 only need Emscripten if you change the engine:
@@ -234,24 +272,29 @@ engine/                C++ matching engine
   tests/               72 assertions, no framework
   Makefile             `make test` natively, `make wasm` for the browser
 public/engine/         the compiled .wasm and its loader (committed)
+public/python/         the Pyodide worker
 src/
-  app/                 routes: / · /dashboard · /course · /orderbook · /settings
+  app/                 routes: / · /dashboard · /course · /practice · /orderbook · /settings
   components/
     atlas/             graph canvas, nodes, filter bar, side panel
     dashboard/         stat tiles, meter lists, chart, proof list
     course/            the 100 Days tracker
+    practice/          pattern sections, problem rows, the Python runner
     orderbook/         depth ladder, learn panel, market-making game
     settings/          target date, export, import, reset
-  data/                domains, skills, paths, resources, course  ← all content
-  lib/                 graph logic, layout, dates, markdown, engine bridge, game maths
+  data/                domains, skills, paths, resources, course, problems  ← all content
+  lib/                 graph logic, layout, dates, markdown, engine bridge, game maths,
+                       practice stats and the Python client
   store/               Zustand progress store
-scripts/check-links.ts resource link checker
+scripts/
+  check-links.ts       resource link checker
+  sync-problems.ts     regenerates the NeetCode 150 from NeetCode's own data
 ```
 
 `src/lib/` is where the testable logic lives — status derivation, cycle detection,
 path closure, progress maths, recommendation ranking, pace, streaks, layout, the
-markdown parser and the market-making simulation are all pure functions with tests
-in `src/lib/__tests__/`.
+markdown parser, the practice statistics, the spaced-review scheduler and the
+market-making simulation are all pure functions with tests in `src/lib/__tests__/`.
 
 ## Deploying to Vercel
 
