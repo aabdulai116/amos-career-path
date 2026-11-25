@@ -273,7 +273,8 @@ function AtlasCanvas() {
             maskStrokeColor="#38bdf8"
             maskStrokeWidth={3}
             style={{ width: 176, height: 132 }}
-            className="!m-3 !rounded-lg !border !border-[var(--border)]"
+            // On a phone the minimap would cover most of the canvas.
+            className="!m-3 !hidden !rounded-lg !border !border-[var(--border)] sm:!block"
             nodeColor={(node) =>
               node.type === "band"
                 ? "transparent"

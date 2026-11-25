@@ -101,7 +101,7 @@ export function FilterBar({
 
   const chip = (active: boolean): string =>
     [
-      "rounded-full border px-3 py-1 text-xs whitespace-nowrap transition-colors",
+      "shrink-0 rounded-full border px-3 py-1 text-xs whitespace-nowrap transition-colors",
       active
         ? "border-transparent text-[#0a0d12]"
         : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--foreground)]",
@@ -168,8 +168,8 @@ export function FilterBar({
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[11px] tracking-wider text-[var(--muted)] uppercase">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 sm:flex-wrap sm:overflow-x-visible sm:pb-0">
+        <span className="mr-1 shrink-0 text-[11px] tracking-wider text-[var(--muted)] uppercase">
           Path
         </span>
         <button
@@ -199,14 +199,14 @@ export function FilterBar({
           );
         })}
         {selectedPath && (
-          <span className="w-full text-[11px] text-[var(--muted)] italic">
+          <span className="hidden w-full text-[11px] text-[var(--muted)] italic sm:block">
             {selectedPath.tagline}
           </span>
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[11px] tracking-wider text-[var(--muted)] uppercase">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 sm:flex-wrap sm:overflow-x-visible sm:pb-0">
+        <span className="mr-1 shrink-0 text-[11px] tracking-wider text-[var(--muted)] uppercase">
           Domain
         </span>
         {domains.map((domain) => {
@@ -229,7 +229,7 @@ export function FilterBar({
           <button
             type="button"
             onClick={() => selectedDomainIds.forEach(onToggleDomain)}
-            className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
           >
             <X className="size-3" aria-hidden />
             clear
