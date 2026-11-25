@@ -5,6 +5,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { dayKey } from "@/lib/dates";
 import type {
   CustomResource,
+  DayProgress,
   ProgressState,
   SkillProgress,
 } from "@/lib/types";
@@ -20,9 +21,19 @@ const emptySkill = (): SkillProgress => ({
   resourcesWatched: [],
 });
 
+const emptyDay = (): DayProgress => ({
+  watched: false,
+  projectDone: false,
+  notes: "",
+  repoUrl: "",
+  lectureUrl: "",
+  completedAt: null,
+});
+
 export const initialState: ProgressState = {
   version: 1,
   skills: {},
+  course: {},
   customResources: [],
   dayLogs: {},
   settings: {
@@ -43,6 +54,12 @@ interface Actions {
   logHours: (skillId: string, hours: number) => void;
   addCustomResource: (skillId: string, title: string, url: string) => void;
   removeCustomResource: (id: string) => void;
+  /** 100 Days of Code: mark a day's lectures watched, or its project built. */
+  setDayWatched: (day: number, watched: boolean) => void;
+  setDayProjectDone: (day: number, done: boolean) => void;
+  setDayNotes: (day: number, notes: string) => void;
+  setDayRepoUrl: (day: number, url: string) => void;
+  setDayLectureUrl: (day: number, url: string) => void;
   setRecruitingDate: (iso: string) => void;
   setSelectedPath: (pathId: string | null) => void;
   importState: (raw: unknown) => { ok: true } | { ok: false; error: string };
@@ -89,6 +106,11 @@ export const parseProgressState = (
     state: {
       version: 1,
       skills: value.skills,
+      // Exports written before the course tracker existed simply have none.
+      course:
+        typeof value.course === "object" && value.course !== null
+          ? value.course
+          : {},
       customResources: Array.isArray(value.customResources)
         ? value.customResources
         : [],
@@ -210,6 +232,57 @@ export const useProgress = create<ProgressStore>()(
           customResources: state.customResources.filter((r) => r.id !== id),
         })),
 
+      setDayWatched: (day, watched) =>
+        set((state) => {
+          const existing = state.course[day] ?? emptyDay();
+          return {
+            course: {
+              ...state.course,
+              [day]: {
+                ...existing,
+                watched,
+                completedAt: watched ? new Date().toISOString() : null,
+              },
+            },
+            // Finishing a day counts as activity for the streak. Time is not
+            // logged automatically - watch speed is nobody's guess but mine.
+            dayLogs: watched ? touchDay(state.dayLogs, 0, 1) : state.dayLogs,
+          };
+        }),
+
+      setDayProjectDone: (day, done) =>
+        set((state) => ({
+          course: {
+            ...state.course,
+            [day]: { ...(state.course[day] ?? emptyDay()), projectDone: done },
+          },
+          dayLogs: done ? touchDay(state.dayLogs, 0, 1) : state.dayLogs,
+        })),
+
+      setDayNotes: (day, notes) =>
+        set((state) => ({
+          course: {
+            ...state.course,
+            [day]: { ...(state.course[day] ?? emptyDay()), notes },
+          },
+        })),
+
+      setDayRepoUrl: (day, repoUrl) =>
+        set((state) => ({
+          course: {
+            ...state.course,
+            [day]: { ...(state.course[day] ?? emptyDay()), repoUrl },
+          },
+        })),
+
+      setDayLectureUrl: (day, lectureUrl) =>
+        set((state) => ({
+          course: {
+            ...state.course,
+            [day]: { ...(state.course[day] ?? emptyDay()), lectureUrl },
+          },
+        })),
+
       setRecruitingDate: (iso) =>
         set((state) => ({
           settings: { ...state.settings, recruitingDate: iso },
@@ -228,8 +301,9 @@ export const useProgress = create<ProgressStore>()(
       },
 
       exportState: () => {
-        const { version, skills, customResources, dayLogs, settings } = get();
-        return { version, skills, customResources, dayLogs, settings };
+        const { version, skills, course, customResources, dayLogs, settings } =
+          get();
+        return { version, skills, course, customResources, dayLogs, settings };
       },
 
       resetAll: () => set({ ...initialState }),
@@ -242,13 +316,14 @@ export const useProgress = create<ProgressStore>()(
       // Read storage from an effect instead of at import time, so the server
       // markup and the first client render agree. useHydrateProgress() does it.
       skipHydration: true,
-      partialize: ({ version, skills, customResources, dayLogs, settings }) => ({
+      partialize: ({
         version,
         skills,
+        course,
         customResources,
         dayLogs,
         settings,
-      }),
+      }) => ({ version, skills, course, customResources, dayLogs, settings }),
       onRehydrateStorage: () => (state) => state?.setHydrated(),
     },
   ),

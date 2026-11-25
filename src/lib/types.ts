@@ -67,6 +67,45 @@ export interface CustomResource {
   addedAt: string;
 }
 
+/* ------------------------------------------------------- 100 Days of Code */
+
+export type CourseTrack =
+  | "Beginner"
+  | "Intermediate"
+  | "Intermediate+"
+  | "Web Foundation"
+  | "Advanced"
+  | "Portfolio"
+  | "Wrap-up";
+
+/** A practice build of my own for a day, separate from the course's project. */
+export interface CourseProject {
+  title: string;
+  brief: string;
+}
+
+export interface CourseDay {
+  day: number;
+  /** Udemy section number, which matches the day for this course. */
+  section: number;
+  title: string;
+  track: CourseTrack;
+  lectures: number;
+  minutes: number;
+  project: CourseProject | null;
+}
+
+export interface DayProgress {
+  watched: boolean;
+  projectDone: boolean;
+  notes: string;
+  /** Where the practice project lives. */
+  repoUrl: string;
+  /** The Udemy lecture link for this day, pasted once and kept. */
+  lectureUrl: string;
+  completedAt: string | null;
+}
+
 export type SkillStatus = "locked" | "available" | "in_progress" | "done";
 
 /** Everything the user has typed or checked for one skill. */
@@ -96,6 +135,8 @@ export interface DayLog {
 export interface ProgressState {
   version: 1;
   skills: Record<string, SkillProgress>;
+  /** Keyed by day number as a string. */
+  course: Record<string, DayProgress>;
   customResources: CustomResource[];
   /** Keyed by YYYY-MM-DD. */
   dayLogs: Record<string, DayLog>;
