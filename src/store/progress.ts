@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { stamp } from "@/store/stamp";
 import { dayKey } from "@/lib/dates";
 import { normaliseCompany } from "@/lib/internships";
 import type {
@@ -203,7 +204,7 @@ export const parseProgressState = (
 
 export const useProgress = create<ProgressStore>()(
   persist(
-    (set, get) => ({
+    stamp((set, get) => ({
       ...initialState,
       hasHydrated: false,
       setHydrated: () => set({ hasHydrated: true }),
@@ -581,7 +582,7 @@ export const useProgress = create<ProgressStore>()(
 
       resetAll: () => set({ ...initialState }),
 
-    }),
+    })),
     {
       name: STORAGE_KEY,
       version: 1,

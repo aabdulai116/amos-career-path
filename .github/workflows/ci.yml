@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A second push to the same branch cancels the first; no point finishing a
+# run for a commit that has already been replaced.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      # The database tests run Postgres in-process via PGlite, so there is no
+      # service container here and nothing to wait for.
+      - run: npm run test
+      - run: npm run build
+
+  worker:
+    name: Python worker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # No dependencies to install - the worker is standard library only.
+      - run: npm run test:worker
+
+  engine:
+    name: C++ engine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make -C engine test
+
+  links:
+    name: Resource links
+    runs-on: ubuntu-latest
+    # Hits other people's servers, so it runs on main rather than on every
+    # push to a branch, and a flaky network does not fail a pull request.
+    if: github.event_name == 'push'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check:links

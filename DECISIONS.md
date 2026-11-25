@@ -584,3 +584,81 @@ the inheritance working end to end; Bandwidth collapsed to one row badged
 at 375 px. The console showed module errors from a file moved earlier in the
 session — stale HMR buffer, disproved by a clean production build from a
 cleared `.next` and a fresh dev server with no errors.
+
+## Phase 13 — accounts, sync and CI
+
+**Signed out is the default, not the fallback.** The whole app works with no
+account and no database: progress stays in localStorage exactly as it always
+did. That is what someone gets when they open a shared link, and it is the
+single most important decision here. A signup wall is how a tool meant for
+first-years ends up used by nobody. Every server path copes with `getDb()`
+returning null, and each sign-in provider only registers when its credentials
+exist, so a deployment with no environment variables simply has no sign-in
+button rather than a broken one.
+
+**No passwords.** Google and Microsoft only. A student project that stores
+password hashes is a student project that will one day leak them, and both
+providers are accounts every university already issues. It also removes the
+reset-email flow entirely.
+
+**Normalised tables, not a JSON blob per user.** A blob would have been a
+tenth of the code. Real columns mean a user's work can be queried, a bad write
+touches one row instead of all of it, and two devices editing different skills
+do not collide. Twelve tables: four that Auth.js owns and eight of the app's.
+
+**Merge per record, not per document.** Whole-document last-write-wins means
+opening the app on a phone can erase an evening's work from a laptop, which is
+the kind of loss that makes someone stop trusting a tool. Records are small and
+independent, so they are resolved separately. Ties go to the server, so a
+device that merely reads cannot overwrite.
+
+**Timestamps come from middleware, not from eighteen mutations.** Last-write-
+wins needs an `updatedAt` on every record. Writing that into each reducer is
+eighteen chances to forget one, and a record whose timestamp never moves
+silently loses to a stale device forever. A small Zustand middleware stamps
+whichever records changed, detected by reference inequality — every reducer
+already builds a fresh object only for the entry it touches, so that is exactly
+the set, with no deep comparison and nothing to maintain as mutations are
+added.
+
+**No tombstones, and it is written down.** Clear a problem on a laptop and a
+phone that has not synced since will put it back. Fixing it properly means
+recording deletions and keeping them until every device has seen them. Worth
+doing if this ever needs to be exact; not worth the complexity now. Stated in
+the code, in SETUP.md and here rather than left for someone to discover.
+
+**The Neon HTTP driver was the wrong choice, found before shipping.** The save
+replaces several tables and must not half-succeed, so it runs in a transaction
+— and `drizzle-orm/neon-http` throws "No transactions support" the moment one
+opens. Switched to the WebSocket pool driver, which gives real transactions and
+behaves like the Postgres the tests run against, so the tests exercise the
+production path rather than a different one.
+
+**Database tests run real Postgres, in-process.** PGlite is Postgres compiled
+to WebAssembly, so the committed migration is applied for real, foreign keys
+and cascades behave, and transactions are transactions. No service container,
+no fixtures pretending to be a database, and CI runs them as cheaply as a unit
+test. They cover the round trip of every record type, that one user's rows are
+invisible to another, that deleting a user cascades, and that syncing twice
+changes nothing.
+
+**Authorization is deliberately boring.** Every query filters by the user id
+from the session, and no code path takes a user id from a request body. The
+body is validated by the same parser an imported file goes through, because it
+arrives from a browser and is input, not data.
+
+**Account deletion is a button.** The moment other people's data is involved,
+"let me out" cannot be an email to me. One delete, cascaded by foreign keys.
+
+**CI runs all three languages.** Typecheck, lint, 463 TypeScript tests and the
+build; 46 Python tests with no dependencies to install; 72 C++ assertions. The
+link checker hits other people's servers, so it runs only on main and is
+allowed to fail without failing the build — a flaky network should not block a
+pull request.
+
+**An audit regression was fixed rather than accepted.** Adding drizzle-kit
+pulled in an esbuild with a known advisory through a deprecated transitive
+dependency, taking the project from zero vulnerabilities to four. The suggested
+fix was a major downgrade of drizzle-kit. An `overrides` entry forcing a
+patched esbuild fixed it instead, and generating the migration afterwards
+proved drizzle-kit still works.

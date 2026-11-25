@@ -10,6 +10,7 @@ import {
   GraduationCap,
   LayoutGrid,
   Settings,
+  UserRound,
 } from "lucide-react";
 
 const links = [
@@ -20,6 +21,7 @@ const links = [
   { href: "/internships", label: "Internships", icon: Briefcase },
   { href: "/orderbook", label: "Order book", icon: CandlestickChart },
   { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/account", label: "Account", icon: UserRound },
 ];
 
 export function Nav() {

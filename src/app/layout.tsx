@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Nav } from "@/components/Nav";
+import { SessionBoundary } from "@/components/account/SessionBoundary";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,8 +40,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex h-full flex-col antialiased`}
       >
-        <Nav />
-        <main className="min-h-0 flex-1">{children}</main>
+        <SessionBoundary>
+          <Nav />
+          <main className="min-h-0 flex-1">{children}</main>
+        </SessionBoundary>
       </body>
     </html>
   );

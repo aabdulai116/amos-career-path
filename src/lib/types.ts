@@ -143,6 +143,8 @@ export interface DayProgress {
   /** The Udemy lecture link for this day, pasted once and kept. */
   lectureUrl: string;
   completedAt: string | null;
+  /** ISO, stamped by the store's middleware. Drives sync conflict resolution. */
+  updatedAt?: string;
 }
 
 /* ----------------------------------------------- LeetCode / NeetCode practice */
@@ -217,6 +219,8 @@ export interface ProblemProgress {
   usedHint: boolean;
   solvedAt: string | null;
   lastAttemptAt: string | null;
+  /** ISO, stamped by the store's middleware. Drives sync conflict resolution. */
+  updatedAt?: string;
 }
 
 /* ------------------------------------------------------------- internships */
@@ -306,6 +310,8 @@ export interface SkillProgress {
   completedAt: string | null;
   /** Stable resource ids, see resourceId(). */
   resourcesWatched: string[];
+  /** ISO, stamped by the store's middleware. Drives sync conflict resolution. */
+  updatedAt?: string;
 }
 
 export interface DayLog {
@@ -336,5 +342,7 @@ export interface ProgressState {
     selectedPathId: string | null;
     /** When I last opened the internships page, for "new since". */
     internshipsSeenAt: string | null;
+    /** ISO, stamped whenever a setting changes. */
+    updatedAt?: string;
   };
 }

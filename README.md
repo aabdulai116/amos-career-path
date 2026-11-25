@@ -13,7 +13,8 @@ Progress lives in `localStorage`. Content lives in typed data files in the repo.
 There is no backend.
 
 ```
-TypeScript · Python · C++ · WebAssembly · 421 TS tests · 46 Python tests · 72 C++ assertions
+TypeScript · Python · C++ · PostgreSQL · WebAssembly
+463 TS tests · 46 Python tests · 72 C++ assertions
 ```
 
 ![The Atlas, filtered to the Quant Trader path](docs/screenshots/atlas.jpg)
@@ -182,6 +183,31 @@ npm run sync:internships   # fetch, classify, write
 npm run test:worker        # 46 tests, no dependencies
 ```
 
+### Accounts and sync
+Everything works signed out — progress lives in the browser, and someone
+opening a shared link gets the whole app with nothing to sign up for. That is
+the default on purpose: a signup wall is how a tool meant for first-years ends
+up used by nobody.
+
+Signing in with Google or Microsoft moves the same data somewhere it survives
+a cleared cache or a new laptop. There are no passwords, so there are none to
+leak and no reset flow to build.
+
+**Sync is one endpoint and one round trip.** The browser posts its whole
+document, the server merges it with what is stored, writes the result and
+returns it. Merging happens per record rather than per document, resolved by
+timestamp, so an evening's work on a laptop is not erased by opening the app
+on a phone. Timestamps come from a small Zustand middleware that stamps
+whichever records a change actually touched — one place instead of eighteen
+mutations each remembering to.
+
+The first sync after signing in sends whatever the browser already had, so
+work done before making an account is adopted rather than lost. `/account` has
+a delete button that removes the account and every row attached to it by
+cascade; once other people's data is involved, that is not optional.
+
+See [docs/SETUP.md](docs/SETUP.md) to turn it on.
+
 ### Settings
 Editable recruiting date, export progress as JSON, import it back, reset with an
 inline confirm.
@@ -197,7 +223,9 @@ inline confirm.
 | Engine | C++20 → WebAssembly via Emscripten and embind |
 | Python | Pyodide 314.0.8 (CPython 3.14 → WebAssembly), in a Web Worker |
 | State | Zustand, persisted to `localStorage` |
-| Tests | Vitest (421), `unittest` (46) and a dependency-free C++ runner (72 assertions) |
+| Tests | Vitest (463), `unittest` (46) and a dependency-free C++ runner (72 assertions) |
+| Auth | Auth.js v5 — Google and Microsoft, no passwords |
+| Database | Neon Postgres with Drizzle ORM and committed migrations |
 | Deploy | Vercel |
 
 ## What this project demonstrates
@@ -215,6 +243,16 @@ Written down because a repo should say what it is evidence of.
   elements, so no HTML string is ever built and hrefs are scheme-filtered
 - **Data visualisation** — palettes validated against colour-vision deficiency and
   contrast rather than eyeballed
+- **Backend and data modelling** — a twelve-table Postgres schema with
+  committed migrations, every query scoped to the session's user, and a
+  delete-then-insert save inside one transaction so a failure cannot leave
+  half a person's work
+- **Testing a database for real** — the integration tests run the committed
+  migration against Postgres compiled to WebAssembly, in-process, so CI needs
+  no service container and the code under test is the code that ships
+- **Distributed state** — last-write-wins merge per record, proved idempotent
+  and order-independent, with the one thing it cannot do (deletions) written
+  down rather than hidden
 - **Data engineering** — a dependency-free Python pipeline with a classifier
   whose largest output class is "I do not know", because that is what the data
   supports; counted drops at every filter stage, so it cannot quietly lie
@@ -256,6 +294,8 @@ Then open <http://localhost:3000>.
 | `npm run sync:problems` | Regenerate the NeetCode 150 from NeetCode's published data |
 | `npm run sync:internships` | Refetch and reclassify the internship listings |
 | `npm run test:worker` | The Python worker's tests |
+| `npx drizzle-kit generate` | Create a migration after a schema change |
+| `npx drizzle-kit migrate` | Apply migrations to the database |
 
 The compiled `.wasm` is committed, so the app runs without a C++ toolchain. You
 only need Emscripten if you change the engine:
@@ -352,9 +392,13 @@ worker/                Python internship pipeline
 public/engine/         the compiled .wasm and its loader (committed)
 public/python/         the Pyodide worker
 public/data/           the generated internship listings (committed)
+drizzle/               committed SQL migrations
 src/
   app/                 routes: / · /dashboard · /course · /practice · /internships
-                       · /orderbook · /settings
+                       · /orderbook · /settings · /account
+    api/               auth callbacks, sync, account deletion
+  db/                  schema and the Neon connection
+  server/              server-only data access, scoped to the session user
   components/
     atlas/             graph canvas, nodes, filter bar, side panel
     dashboard/         stat tiles, meter lists, chart, proof list
