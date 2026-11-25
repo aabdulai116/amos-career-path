@@ -504,3 +504,83 @@ to decide, and "O(n) amortised" or "O(log n) average, O(n) worst" does not fit a
 picker. Both halves are needed before the pair shows on the collapsed row, and
 the practice page counts solved problems with no Big-O written down, because
 that gap is exactly what a revision pass would otherwise discover too late.
+
+## Phase 12 — internships and the Python worker
+
+**The honest finding came first.** The plan was a keyword classifier over
+listing text. The feed has no listing text, and of its 5,066 active records the
+`sponsorship` field says something useful for 14. Zero titles mention a
+clearance, citizenship or ITAR. A keyword classifier would have matched nothing
+and reported a confident empty result, which is worse than no feature.
+
+**So the unit of classification is the employer, not the advert.** Cleared and
+export-controlled work is a property of the company and stable enough to write
+down. `worker/companies.py` lists 38 — defence primes, FFRDCs and national
+labs, ITAR hardware — each with the reason, rendered in the UI verbatim so the
+claim can be checked rather than trusted. It is deliberately short: a wrong
+block hides a real job, while a missing company costs one manual check. That
+asymmetry decided every borderline call.
+
+**96% of listings are "unknown", and they stay in the list.** Silence is not a
+no. A test asserts the unknown share stays above 80%, so a future change that
+starts claiming to know most of them fails loudly rather than quietly guessing.
+Another asserts blocked stays under 15%.
+
+**"Does not sponsor" is amber, not red.** CPT is work authorisation a student
+already holds through their university; it costs the employer no petition. A
+company that will not sponsor an H-1B may still take a CPT intern. Treating it
+as a closed door would hide jobs that are open.
+
+**Company-name matching was the real bug.** The first version used
+`"saic" in name.lower()` and declared *Mosaic* and *RosaicLabs* defence
+contractors on the live feed. `normalise()` lowercases, strips punctuation and
+drops corporate suffixes, and matching is exact on that form. Both false
+positives are pinned by tests, in Python and again against the generated file.
+
+**The normaliser exists twice, on purpose, and is tested against itself.**
+Python decides the verdicts; TypeScript stores mine, keyed the same way, or a
+verdict recorded in the app would not match the employer the worker decided
+about. A test in the app checks its implementation against a table of answers
+produced by the Python one.
+
+**A test caught redundancy the aliases did not need.** Asserting no duplicate
+keys failed on ten aliases that `normalise()` already resolved — "Anduril
+Industries", "Sandia National Labs" and the rest. They came out, and the test
+now prevents them coming back.
+
+**Duplicate requisitions are grouped, not dropped.** Bandwidth posts the same
+Raleigh role seven times with seven requisition ids; TikTok fourteen. All are
+real, so none is removed — the newest leads the group and the others come along
+as extra links. 2,996 rows became 2,815.
+
+**The data file lives in public/, not src/data/.** Three thousand listings are
+1.1 MB. Compiled into a TypeScript module that is 1.1 MB of JavaScript in the
+bundle; as a static file it is fetched once, gzips to 230 KB and costs the rest
+of the app nothing. The app validates it on arrival rather than trusting its
+own generator, and a test asserts the app drops none of what the worker wrote —
+if it did, one of the two would be wrong.
+
+**Plain http is flagged, not filtered.** Three employers serve their
+application form over unencrypted http. Dropping them would hide real jobs, so
+the row warns instead; an application form is exactly where personal details
+get typed. A test holds the share under 2%.
+
+**Notifications are not built, and the reason is stated.** "First to know"
+needs a scheduler, somewhere to remember what has been seen and a delivery
+channel — the point where this stops being a static site. The offline version
+that is genuinely useful shipped instead: the page records when it was last
+opened and marks what is new since. The visit is stamped on unmount, so the
+session that is reading the page still sees its own "new".
+
+**Summer 2027, not 2028.** The repository for a summer appears about a year
+ahead and `SimplifyJobs/Summer2028-Internships` returns a 404 today. One
+constant changes when it exists. Summer 2027 is not a placeholder: those roles
+are open now and a sophomore can apply to them.
+
+**Verified in the browser.** Marking TikTok "No CPT" on one listing moved
+"ruled out" from 105 to 236 and emptied a filtered view of 131 roles, which is
+the inheritance working end to end; Bandwidth collapsed to one row badged
+"7 openings" with all seven links intact; the page has no horizontal overflow
+at 375 px. The console showed module errors from a file moved earlier in the
+session — stale HMR buffer, disproved by a clean production build from a
+cleared `.next` and a fresh dev server with no errors.

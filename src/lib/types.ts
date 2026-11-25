@@ -219,6 +219,77 @@ export interface ProblemProgress {
   lastAttemptAt: string | null;
 }
 
+/* ------------------------------------------------------------- internships */
+
+/**
+ * What is known about whether an F-1 student on CPT can take this role.
+ * Produced by worker/authorisation.py; see that file for why the large
+ * "unknown" bucket is the honest answer rather than a cop-out.
+ */
+export type AuthStatus = "blocked" | "no_sponsorship" | "sponsors" | "unknown";
+
+/** Where the verdict came from, which is how much to trust it. */
+export type AuthEvidence = "feed" | "company" | "none";
+
+export interface Internship {
+  id: string;
+  company: string;
+  title: string;
+  url: string;
+  category: string;
+  locations: string[];
+  degrees: string[];
+  terms: string[];
+  /** Unix seconds; 0 when the feed gave no date. */
+  posted: number;
+  status: AuthStatus;
+  evidence: AuthEvidence;
+  /** Key into the feed's reason table, not the prose itself. */
+  reason: string;
+  /**
+   * How many indistinguishable requisitions this row stands for. Big employers
+   * post the same role once per team; none is dropped, they are just folded in.
+   */
+  openings: number;
+  /** The other requisitions' links, when openings > 1. */
+  more: string[];
+}
+
+export interface InternshipFeed {
+  version: 1;
+  generatedAt: number;
+  season: string;
+  source: string;
+  reasons: Record<string, string>;
+  listings: Internship[];
+}
+
+/**
+ * My own finding about an employer, which beats anything the generated data
+ * says. Checked once, then inherited by every future role from that company -
+ * the whole point, since "do they take CPT" is a fact about the employer.
+ */
+export type CptVerdict = "ok" | "no" | "unsure";
+
+export interface CompanyVerdict {
+  cpt: CptVerdict;
+  note: string;
+  updatedAt: string;
+}
+
+export type ApplicationStage =
+  | "saved"
+  | "applied"
+  | "interview"
+  | "offer"
+  | "rejected";
+
+export interface ApplicationProgress {
+  stage: ApplicationStage;
+  notes: string;
+  updatedAt: string;
+}
+
 export type SkillStatus = "locked" | "available" | "in_progress" | "done";
 
 /** Everything the user has typed or checked for one skill. */
@@ -252,6 +323,10 @@ export interface ProgressState {
   course: Record<string, DayProgress>;
   /** Keyed by LeetCode slug. */
   problems: Record<string, ProblemProgress>;
+  /** Keyed by normalised company name; see normaliseCompany(). */
+  companies: Record<string, CompanyVerdict>;
+  /** Keyed by listing id. */
+  applications: Record<string, ApplicationProgress>;
   customResources: CustomResource[];
   /** Keyed by YYYY-MM-DD. */
   dayLogs: Record<string, DayLog>;
@@ -259,5 +334,7 @@ export interface ProgressState {
     /** ISO date, default 2027-08-01. */
     recruitingDate: string;
     selectedPathId: string | null;
+    /** When I last opened the internships page, for "new since". */
+    internshipsSeenAt: string | null;
   };
 }

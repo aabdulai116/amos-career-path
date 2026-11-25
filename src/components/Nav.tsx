@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Briefcase,
   CandlestickChart,
   Code2,
   GitBranch,
@@ -16,6 +17,7 @@ const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/course", label: "Course", icon: GraduationCap },
   { href: "/practice", label: "Practice", icon: Code2 },
+  { href: "/internships", label: "Internships", icon: Briefcase },
   { href: "/orderbook", label: "Order book", icon: CandlestickChart },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

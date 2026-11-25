@@ -100,23 +100,27 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 
 ## Next up
 
-### Internships
-- [ ] Internships section with roles listed by category
-- [ ] Data source: `SimplifyJobs/Summer2027-Internships` — **verified working**,
-      17,723 listings / 5,070 active / 2,238 Summer 2027 / 229 Quant / 1,555 Software
-- [ ] **Work-authorization filter** to your rule:
-  - exclude *U.S. citizenship required* and anything naming a clearance — CPT cannot fix those
-  - keep but flag amber *Does Not Offer Sponsorship* — that is about future H-1B, not CPT
-  - keep and mark unverified anything silent — your "I'll find out myself" bucket
-- [!] **The sponsorship field is 99.7% silent** (5,056 of 5,070 say `Other`), so the
-      filter alone does nothing. Plan: add a **personal CPT verdict per company**
-      that you set once and every future role from that company inherits, plus a
-      keyword scan for clearance language. *Needs your yes before I build it.*
-- [ ] Filters: category, term, location, degree, posted-within
-- [!] **"First to know" notifications** — needs a backend: Vercel Cron + a store
-      for what you have already seen + email or push. This is the step where the
-      app stops being purely static. *Needs a decision on the stack.*
-- [ ] Saved / applied / rejected tracking per role
+### Internships — Phase 12, shipped
+- [x] Roles listed by category from the verified SimplifyJobs feed, newest first
+- [x] **A Python worker** (`worker/`, no dependencies) that fetches, classifies
+      and writes the page's data; 46 tests
+- [x] **The CPT work-authorisation filter**, built on what the data can actually
+      support: the feed states a position for 14 of 5,066 active listings, and
+      no title mentions a clearance, so the worker rules out 38 employers where
+      citizenship is effectively a precondition and marks the rest unverified
+- [x] **A personal CPT verdict per company**, recorded once and inherited by
+      every future posting from that employer, overriding the generated answer
+- [x] Filters: category, recency, degree, search, and my own stage
+- [x] Saved / applied / interview / offer / rejected tracking, with notes
+- [x] Duplicate requisitions grouped — 2,996 rows became 2,815, nothing dropped
+- [x] Plain-http application forms flagged, since that is where personal
+      details get typed
+- [~] **"First to know" notifications** — still needs a backend. Shipped the
+      honest offline version instead: the page remembers when you last opened
+      it and marks what is new since. Real push needs a scheduler, storage and
+      a delivery channel. *Still needs a decision on the stack.*
+- [ ] Known-sponsor marking from the US Department of Labor's LCA disclosure
+      files, which would let a listing cite a real filing rather than a guess
 
 ### LeetCode & NeetCode — Phase 10, shipped
 - [x] All eighteen patterns, in NeetCode's own order, because the order is the

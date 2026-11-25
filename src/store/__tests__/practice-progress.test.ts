@@ -250,3 +250,140 @@ describe("course exercises", () => {
     expect(entry.exerciseCode["9-1"]).toBe("print('a')");
   });
 });
+
+describe("company CPT verdicts", () => {
+  beforeEach(() => {
+    useProgress.getState().resetAll();
+  });
+
+  it("stores a verdict under the normalised company name", () => {
+    useProgress.getState().setCompanyVerdict("Rocket Lab USA", "no");
+    expect(useProgress.getState().companies["rocket lab"].cpt).toBe("no");
+  });
+
+  it("lets every spelling of a company find the same verdict", () => {
+    useProgress.getState().setCompanyVerdict("Anduril Industries", "no");
+    const stored = useProgress.getState().companies;
+    expect(stored["anduril"]).toBeDefined();
+    expect(Object.keys(stored)).toHaveLength(1);
+  });
+
+  it("keeps the note when only the verdict changes", () => {
+    const { setCompanyVerdict } = useProgress.getState();
+    setCompanyVerdict("Stripe", "unsure", "emailed the recruiter");
+    setCompanyVerdict("Stripe", "ok");
+    const entry = useProgress.getState().companies["stripe"];
+    expect(entry.cpt).toBe("ok");
+    expect(entry.note).toBe("emailed the recruiter");
+  });
+
+  it("ignores a company name that normalises to nothing", () => {
+    useProgress.getState().setCompanyVerdict("   ", "ok");
+    expect(useProgress.getState().companies).toEqual({});
+  });
+
+  it("removes a verdict on clear, by any spelling", () => {
+    const { setCompanyVerdict, clearCompanyVerdict } = useProgress.getState();
+    setCompanyVerdict("Booz Allen Hamilton", "no");
+    clearCompanyVerdict("booz allen hamilton");
+    expect(useProgress.getState().companies).toEqual({});
+  });
+
+  it("stamps the time it was decided", () => {
+    useProgress.getState().setCompanyVerdict("Stripe", "ok");
+    expect(useProgress.getState().companies["stripe"].updatedAt).not.toBe("");
+  });
+});
+
+describe("application tracking", () => {
+  beforeEach(() => {
+    useProgress.getState().resetAll();
+  });
+
+  it("moves a listing through the stages", () => {
+    const { setApplicationStage } = useProgress.getState();
+    setApplicationStage("job-1", "saved");
+    expect(useProgress.getState().applications["job-1"].stage).toBe("saved");
+    setApplicationStage("job-1", "applied");
+    expect(useProgress.getState().applications["job-1"].stage).toBe("applied");
+  });
+
+  it("keeps notes across a stage change", () => {
+    const store = useProgress.getState();
+    store.setApplicationNotes("job-1", "referred by a friend");
+    store.setApplicationStage("job-1", "interview");
+    const entry = useProgress.getState().applications["job-1"];
+    expect(entry.notes).toBe("referred by a friend");
+    expect(entry.stage).toBe("interview");
+  });
+
+  it("defaults to saved when a note arrives first", () => {
+    useProgress.getState().setApplicationNotes("job-1", "looks good");
+    expect(useProgress.getState().applications["job-1"].stage).toBe("saved");
+  });
+
+  it("credits an application to today, but not merely saving one", () => {
+    const { setApplicationStage } = useProgress.getState();
+    setApplicationStage("job-1", "saved");
+    expect(useProgress.getState().dayLogs[dayKey()]).toBeUndefined();
+    setApplicationStage("job-2", "applied");
+    expect(useProgress.getState().dayLogs[dayKey()].resources).toBe(1);
+  });
+
+  it("removes the entry on reset", () => {
+    const { setApplicationStage } = useProgress.getState();
+    setApplicationStage("job-1", "applied");
+    setApplicationStage("job-1", "reset");
+    expect(useProgress.getState().applications["job-1"]).toBeUndefined();
+  });
+
+  it("round-trips verdicts and applications through export and import", () => {
+    const store = useProgress.getState();
+    store.setCompanyVerdict("Jane Street", "ok", "asked at a career fair");
+    store.setApplicationStage("job-1", "interview");
+    const exported = useProgress.getState().exportState();
+
+    useProgress.getState().resetAll();
+    expect(useProgress.getState().companies).toEqual({});
+
+    useProgress.getState().importState(exported);
+    expect(useProgress.getState().companies["jane street"].note).toBe(
+      "asked at a career fair",
+    );
+    expect(useProgress.getState().applications["job-1"].stage).toBe("interview");
+  });
+
+  it("accepts an export written before the internships page existed", () => {
+    const old = {
+      version: 1,
+      skills: {},
+      course: {},
+      problems: {},
+      customResources: [],
+      dayLogs: {},
+      settings: { recruitingDate: "2027-08-01", selectedPathId: null },
+    };
+    expect(useProgress.getState().importState(old).ok).toBe(true);
+    expect(useProgress.getState().companies).toEqual({});
+    expect(useProgress.getState().applications).toEqual({});
+    expect(useProgress.getState().settings.internshipsSeenAt).toBeNull();
+  });
+});
+
+describe("the internships visit stamp", () => {
+  beforeEach(() => {
+    useProgress.getState().resetAll();
+  });
+
+  it("starts unset and records a visit", () => {
+    expect(useProgress.getState().settings.internshipsSeenAt).toBeNull();
+    useProgress.getState().markInternshipsSeen();
+    expect(useProgress.getState().settings.internshipsSeenAt).not.toBeNull();
+  });
+
+  it("leaves the other settings alone", () => {
+    useProgress.getState().setRecruitingDate("2028-01-01");
+    useProgress.getState().markInternshipsSeen();
+    expect(useProgress.getState().settings.recruitingDate).toBe("2028-01-01");
+  });
+});

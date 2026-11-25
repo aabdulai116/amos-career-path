@@ -3,7 +3,12 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { dayKey } from "@/lib/dates";
+import { normaliseCompany } from "@/lib/internships";
 import type {
+  ApplicationProgress,
+  ApplicationStage,
+  CompanyVerdict,
+  CptVerdict,
   CustomResource,
   DayProgress,
   ProblemProgress,
@@ -52,11 +57,14 @@ export const initialState: ProgressState = {
   skills: {},
   course: {},
   problems: {},
+  companies: {},
+  applications: {},
   customResources: [],
   dayLogs: {},
   settings: {
     recruitingDate: DEFAULT_RECRUITING_DATE,
     selectedPathId: null,
+    internshipsSeenAt: null,
   },
 };
 
@@ -93,6 +101,16 @@ interface Actions {
     value: string,
   ) => void;
   setProblemHint: (slug: string, usedHint: boolean) => void;
+  /** My own finding about an employer; inherited by its future postings. */
+  setCompanyVerdict: (company: string, cpt: CptVerdict, note?: string) => void;
+  clearCompanyVerdict: (company: string) => void;
+  setApplicationStage: (
+    listingId: string,
+    stage: ApplicationStage | "reset",
+  ) => void;
+  setApplicationNotes: (listingId: string, notes: string) => void;
+  /** Stamp the internships page as seen, for the "new since" count. */
+  markInternshipsSeen: () => void;
   setRecruitingDate: (iso: string) => void;
   setSelectedPath: (pathId: string | null) => void;
   importState: (raw: unknown) => { ok: true } | { ok: false; error: string };
@@ -149,6 +167,15 @@ export const parseProgressState = (
         typeof value.problems === "object" && value.problems !== null
           ? value.problems
           : {},
+      // Exports written before the internships page existed simply have none.
+      companies:
+        typeof value.companies === "object" && value.companies !== null
+          ? value.companies
+          : {},
+      applications:
+        typeof value.applications === "object" && value.applications !== null
+          ? value.applications
+          : {},
       customResources: Array.isArray(value.customResources)
         ? value.customResources
         : [],
@@ -164,6 +191,10 @@ export const parseProgressState = (
         selectedPathId:
           typeof value.settings?.selectedPathId === "string"
             ? value.settings.selectedPathId
+            : null,
+        internshipsSeenAt:
+          typeof value.settings?.internshipsSeenAt === "string"
+            ? value.settings.internshipsSeenAt
             : null,
       },
     },
@@ -440,6 +471,72 @@ export const useProgress = create<ProgressStore>()(
           };
         }),
 
+      setCompanyVerdict: (company, cpt, note) =>
+        set((state) => {
+          const key = normaliseCompany(company);
+          if (key === "") return state;
+          const existing = state.companies[key];
+          const entry: CompanyVerdict = {
+            cpt,
+            note: note ?? existing?.note ?? "",
+            updatedAt: new Date().toISOString(),
+          };
+          return { companies: { ...state.companies, [key]: entry } };
+        }),
+
+      clearCompanyVerdict: (company) =>
+        set((state) => {
+          const next = { ...state.companies };
+          delete next[normaliseCompany(company)];
+          return { companies: next };
+        }),
+
+      setApplicationStage: (listingId, stage) =>
+        set((state) => {
+          if (stage === "reset") {
+            const next = { ...state.applications };
+            delete next[listingId];
+            return { applications: next };
+          }
+          const existing = state.applications[listingId];
+          const entry: ApplicationProgress = {
+            stage,
+            notes: existing?.notes ?? "",
+            updatedAt: new Date().toISOString(),
+          };
+          return {
+            applications: { ...state.applications, [listingId]: entry },
+            // Sending an application is the activity that matters most here.
+            dayLogs:
+              stage === "applied"
+                ? touchDay(state.dayLogs, 0, 1)
+                : state.dayLogs,
+          };
+        }),
+
+      setApplicationNotes: (listingId, notes) =>
+        set((state) => {
+          const existing = state.applications[listingId];
+          return {
+            applications: {
+              ...state.applications,
+              [listingId]: {
+                stage: existing?.stage ?? "saved",
+                notes,
+                updatedAt: new Date().toISOString(),
+              },
+            },
+          };
+        }),
+
+      markInternshipsSeen: () =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            internshipsSeenAt: new Date().toISOString(),
+          },
+        })),
+
       setRecruitingDate: (iso) =>
         set((state) => ({
           settings: { ...state.settings, recruitingDate: iso },
@@ -463,6 +560,8 @@ export const useProgress = create<ProgressStore>()(
           skills,
           course,
           problems,
+          companies,
+          applications,
           customResources,
           dayLogs,
           settings,
@@ -472,6 +571,8 @@ export const useProgress = create<ProgressStore>()(
           skills,
           course,
           problems,
+          companies,
+          applications,
           customResources,
           dayLogs,
           settings,
@@ -493,6 +594,8 @@ export const useProgress = create<ProgressStore>()(
         skills,
         course,
         problems,
+        companies,
+        applications,
         customResources,
         dayLogs,
         settings,
@@ -501,6 +604,8 @@ export const useProgress = create<ProgressStore>()(
         skills,
         course,
         problems,
+        companies,
+        applications,
         customResources,
         dayLogs,
         settings,

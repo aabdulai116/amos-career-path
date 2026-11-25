@@ -12,6 +12,8 @@
     "test:watch": "vitest",
     "check:links": "tsx scripts/check-links.ts",
     "sync:problems": "tsx scripts/sync-problems.ts",
+    "sync:internships": "python3 worker/ingest.py",
+    "test:worker": "python3 -m unittest discover -s worker/tests -t worker",
     "test:engine": "make -C engine test",
     "build:engine": "make -C engine wasm"
   },
