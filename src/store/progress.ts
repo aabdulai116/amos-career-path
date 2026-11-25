@@ -13,7 +13,6 @@ export const DEFAULT_RECRUITING_DATE = "2027-08-01";
 export const STORAGE_KEY = "amos-career-path:progress:v1";
 
 const emptySkill = (): SkillProgress => ({
-  status: "in_progress",
   notes: "",
   proofUrl: "",
   hoursLogged: 0,
@@ -33,6 +32,9 @@ export const initialState: ProgressState = {
 };
 
 interface Actions {
+  /** False until the persisted state has been read back from localStorage. */
+  hasHydrated: boolean;
+  setHydrated: () => void;
   /** Mark a skill started, done, or back to untouched. */
   setStatus: (skillId: string, status: "in_progress" | "done" | "reset") => void;
   setNotes: (skillId: string, notes: string) => void;
@@ -112,6 +114,8 @@ export const useProgress = create<ProgressStore>()(
   persist(
     (set, get) => ({
       ...initialState,
+      hasHydrated: false,
+      setHydrated: () => set({ hasHydrated: true }),
 
       setStatus: (skillId, status) =>
         set((state) => {
@@ -229,11 +233,15 @@ export const useProgress = create<ProgressStore>()(
       },
 
       resetAll: () => set({ ...initialState }),
+
     }),
     {
       name: STORAGE_KEY,
       version: 1,
       storage: createJSONStorage(() => localStorage),
+      // Read storage from an effect instead of at import time, so the server
+      // markup and the first client render agree. useHydrateProgress() does it.
+      skipHydration: true,
       partialize: ({ version, skills, customResources, dayLogs, settings }) => ({
         version,
         skills,
@@ -241,6 +249,7 @@ export const useProgress = create<ProgressStore>()(
         dayLogs,
         settings,
       }),
+      onRehydrateStorage: () => (state) => state?.setHydrated(),
     },
   ),
 );
