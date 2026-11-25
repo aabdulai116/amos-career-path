@@ -261,3 +261,51 @@ button goes to the course page.
 **`course` was added to the persisted state without a version bump.**
 `parseProgressState` defaults it to `{}`, so a JSON file exported before this
 phase still imports cleanly.
+
+## Phase 7 — C++ order book compiled to WebAssembly
+
+**Integer ticks, never floating point.**
+Prices are `int64` ticks of one cent and quantities are integers. Two orders at
+"the same price" must compare equal for price-time priority to mean anything,
+and `0.1 + 0.2` does not. Every float bug in a matching engine starts here.
+
+**Price priority from the map, time priority from the deque.**
+Bids are a `std::map` ordered descending and asks ascending, so `begin()` is
+always the top of book. Each price level holds a `std::deque<Order>`, so the
+order resting longest at a price fills first. An `unordered_map` from order id
+to its level makes cancel O(1) to find.
+
+**Trades print at the maker's price.**
+A buy limit at 105 hitting a resting ask at 100 trades at 100. The resting order
+set the terms; the taker crossed to it. Tested explicitly, because getting this
+backwards is a classic error.
+
+**A market order's unfilled remainder is cancelled, not rested.**
+That is what an exchange does when the book runs dry, and it is why `submit()`
+takes an `allowResting` flag rather than duplicating the matching loop.
+
+**The engine knows nothing about JavaScript.**
+`order_book.hpp` is plain C++ with no Emscripten include, so it compiles and
+tests natively — 72 assertions, no framework, a non-zero exit code is the whole
+contract. `bindings.cpp` is the only file that touches embind. That split is
+what makes `npm run test:engine` possible without a browser.
+
+**int64 narrows to double at the boundary.**
+JavaScript numbers are doubles, so the binding layer converts. Ticks and lot
+sizes stay far inside double's exact integer range, and the alternative — BigInt
+across embind — would make the JS side unpleasant for no real gain here.
+
+**The .wasm artifact is committed.**
+Normally build output does not belong in git, but Vercel has no Emscripten, so
+an uncommitted artifact means a broken page in production. `npm run build:engine`
+regenerates it; `engine/build/` (the native test binary) stays ignored.
+
+**Bid green and ask red sit in the CVD floor band.**
+The validator puts the pair at ΔE 7.1 for deutan, which is only legal with
+secondary encoding. So the ladder labels each side in text and separates them
+spatially around the spread — the colour is a convention on top, never the only
+signal.
+
+**Verified in the browser, not just in tests.** A market buy of 10 against a
+seeded book filled at 100.05, the best ask, leaving the rest of that level
+resting.

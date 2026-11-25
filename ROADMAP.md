@@ -7,7 +7,7 @@ work it describes, so the checkbox and the code can never drift apart.
 **Status key:** `[x]` shipped · `[~]` partly done · `[ ]` not started ·
 `[!]` blocked or needs a decision · `[–]` declined, with the reason
 
-Last updated: 25 November 2026 · 38 commits · 197 tests · branch `main`
+Last updated: 25 November 2026 · 42 commits · 197 TS tests + 72 C++ checks · branch `main`
 
 ---
 
@@ -62,6 +62,15 @@ Last updated: 25 November 2026 · 38 commits · 197 tests · branch `main`
 - [x] Vercel deploy instructions, both dashboard and CLI
 - [x] Mobile fixes, keyboard path verified, app icon, metadata, `noindex`
 - [x] Repo public at github.com/aabdulai116/amos-career-path, commits authored by you only
+
+### Phase 7 — C++ order book (WebAssembly)
+- [x] Price-time priority matching engine in C++20, 293 lines, no dependencies
+- [x] Limit and market orders, cancel, multi-level sweeps, partial fills
+- [x] 72 native assertions, clean under `-Wall -Wextra -Wpedantic` — `npm run test:engine`
+- [x] Compiled to WebAssembly with Emscripten + embind — `npm run build:engine`
+- [x] Typed TypeScript bridge, no wasm details leaking into React
+- [x] Depth ladder, live stats, order entry, trade tape, imbalance bar
+- [ ] Market-making game on top of the engine (next)
 
 ### Phase 6 — 100 Days of Code tracker
 - [x] All 102 sections as data — titles, lecture counts, run times (sums to 57hr ✓)
@@ -190,7 +199,7 @@ job that double-notifies is worse than one that misses.
 Carries: Python, Postgres schema design and indexing, cron, idempotency, change
 detection, structured logging, Docker for the worker.
 
-**3. Order-book matching engine — C++ compiled to WebAssembly** *(quant gap)*
+**3. Order-book matching engine — C++ compiled to WebAssembly** *(quant gap)* — **SHIPPED**
 
 The Quant Developer path on the Atlas is Low Latency C++ and Market
 Microstructure, and the project currently proves neither. A price-time priority
