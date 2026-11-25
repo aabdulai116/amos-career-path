@@ -1,19 +1,24 @@
 # Amos Career Path
 
-A personal skill map for getting technically ready for **summer 2028 internship
-recruiting**, which opens around **1 August 2027**. 97 skills across ten domains,
-wired into a prerequisite graph, with nine career paths through it — software
-engineering, AI, and the three quant tracks (trader, researcher, developer).
+One place to get technically ready for **summer 2028 internship recruiting**,
+which opens around **1 August 2027** — software engineering, AI, and the three
+quant tracks.
 
-Everything is local: progress lives in `localStorage`, content lives in typed data
-files in the repo.
+It started as a skill map and grew into the tools that map implies: a prerequisite
+graph of 97 skills, a dashboard that knows how far behind I am, a tracker for the
+Python bootcamp I am working through, and a matching engine written in C++ so the
+microstructure nodes on the map are something I have built rather than read about.
+
+Progress lives in `localStorage`. Content lives in typed data files in the repo.
+There is no backend.
+
+```
+TypeScript · C++ · WebAssembly · 235 unit tests · 72 C++ assertions
+```
 
 ![The Atlas, filtered to the Quant Trader path](docs/screenshots/atlas.jpg)
 
 ![The dashboard, scoped to one path](docs/screenshots/dashboard.jpg)
-
-> Both screenshots use sample progress. Replace them with your own by dropping new
-> files over `docs/screenshots/atlas.jpg` and `docs/screenshots/dashboard.jpg`.
 
 ## Why I built this
 
@@ -31,44 +36,92 @@ dashboard knows how many weeks are left, and the recommendation list ranks what 
 available by how much of the map it opens up. The proof-of-work list exists because
 a skill I cannot point to a repo for is not a skill I can put on a resume.
 
-## Features
+## What is in it
 
-**Atlas** — the graph
-- Pan, zoom, minimap and fit-view over all 97 skills, laid out automatically
-- Horizontal position comes from the prerequisite graph; each domain gets its own band
-- Search with a `/` shortcut, arrow keys and Enter to jump straight to a skill
-- Domain and career-path filter chips, which intersect rather than union
-- Nodes carry status, domain colour, level, hour estimate and a resource progress bar
-- Edges animate outward from a prerequisite once it is done
-- Side panel: summary, clickable prerequisites and unlocks, resources grouped
-  beginner → intermediate → advanced with checkboxes, markdown notes with a preview,
-  a proof link, an hours log, and Start / Mark done
-- Locked skills are still fully readable
+### Atlas — the skill graph
+97 skills across ten domains, laid out automatically. Horizontal position comes
+from the prerequisite graph, so nothing ever sits left of something it depends on;
+each domain gets its own band. Search with `/`, filter by domain and career path
+(they intersect, not union), and edges animate outward once a prerequisite is done.
+The side panel holds the summary, clickable prerequisites and unlocks, resources
+grouped beginner → advanced, markdown notes, a proof link and an hours log.
+Locked skills stay fully readable.
 
-**Dashboard**
-- Countdown to the recruiting date and the pace needed to finish in time
-- Overall %, skills done, unlocked now, in progress — scoped to the selected path
-- "Start next": unlocked skills ranked by how many others they unlock
-- Progress by domain and by career path
-- Hours per week with a streak counter and a table view
-- Proof of work: everything finished, with its link, newest first
+### Dashboard
+Countdown to the recruiting date and the pace needed to hit it. Skills done,
+unlocked now, in progress — all scoped to the selected path. "Start next" ranks
+what is available by how many other skills it unlocks. Progress by domain and by
+path, hours per week with a streak, and a proof-of-work list that flags finished
+skills with no link attached.
 
-**Settings**
-- Editable recruiting target date
-- Export progress as JSON, import it back, reset with an inline confirm
+### 100 Days of Code tracker
+![The course tracker](docs/screenshots/course.jpg)
+
+Dr. Angela Yu's bootcamp as a tracker — all 102 sections with lecture counts and
+run times. Watch on Udemy, come back, record the day. **Every one of the 100 days
+also carries a practice project of its own**, deliberately different from the
+course's own build: day 7 is Hangman in the course, so the practice build is a
+category word-guess; day 22 is Pong, so the practice build is Breakout. Each has a
+repo field, so a finished project becomes a proof-of-work entry.
+
+Only the course's structure is here. None of its content is reproduced.
+
+### Order book lab — C++ compiled to WebAssembly
+![The order book lab](docs/screenshots/orderbook.jpg)
+
+A price-time priority matching engine in C++20, compiled to WebAssembly and
+running in the browser. Limit and market orders, cancels, multi-level sweeps and
+partial fills, with a live depth ladder, trade tape and order-book imbalance.
+
+Price priority comes from ordered maps, so `begin()` is always the top of book.
+Time priority comes from a FIFO queue at each price level. Prices are integer
+ticks — two orders at the same price have to compare equal, and `0.1 + 0.2` does
+not. An explainer above the ladder teaches the idea in four steps, three of which
+run against the real engine rather than describing it.
+
+### Make a market
+![The market-making game](docs/screenshots/market-making.jpg)
+
+Quote a two-sided market each round. The quote rests in the C++ book and simulated
+counterparties trade against it through the same engine. Some are noise and are
+where the profit comes from; others can see the true value and only deal when the
+quote is wrong. Scoring separates **spread captured** from **picked off**, because
+total P&L hides the trade-off that makes the job hard.
+
+### Settings
+Editable recruiting date, export progress as JSON, import it back, reset with an
+inline confirm.
 
 ## Tech stack
 
 | | |
 |---|---|
 | Framework | Next.js 16 (App Router), React 19 |
-| Language | TypeScript, `strict`, no `any` |
+| Languages | TypeScript (`strict`, no `any`), C++20 |
 | Styling | Tailwind CSS v4, dark by default |
-| Graph | `@xyflow/react` (React Flow) 12, laid out with `dagre` |
+| Graph | `@xyflow/react` 12, laid out with `dagre` |
+| Engine | C++20 → WebAssembly via Emscripten and embind |
 | State | Zustand, persisted to `localStorage` |
-| Icons | `lucide-react` |
-| Tests | Vitest — 175 unit tests |
+| Tests | Vitest (235) and a dependency-free C++ runner (72 assertions) |
 | Deploy | Vercel |
+
+## What this project demonstrates
+
+Written down because a repo should say what it is evidence of.
+
+- **Graph algorithms** — cycle detection, topological sort, transitive closure and
+  prerequisite closure, hand-written and tested, plus a custom row-packing layout
+  on top of dagre
+- **Systems programming** — a matching engine with no dependencies, integer-tick
+  arithmetic, O(1) cancel via an index into the price levels
+- **WebAssembly** — a clean boundary where `order_book.hpp` has no Emscripten
+  include at all, so the engine tests natively without a browser
+- **Parser writing** — a markdown subset parsed to a tree and rendered as React
+  elements, so no HTML string is ever built and hrefs are scheme-filtered
+- **Data visualisation** — palettes validated against colour-vision deficiency and
+  contrast rather than eyeballed
+- **Testing** — including data-integrity tests that fail the build if the skill
+  graph grows a cycle or a lesson stops demonstrating what it claims
 
 ## Getting started
 
@@ -88,14 +141,23 @@ Then open <http://localhost:3000>.
 | `npm run build` | Production build |
 | `npm run test` | Vitest, once |
 | `npm run test:watch` | Vitest, watching |
+| `npm run test:engine` | The C++ assertions, natively — no browser needed |
+| `npm run build:engine` | Recompile the engine to WebAssembly |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
 | `npm run check:links` | Verify every resource URL still resolves |
 
+The compiled `.wasm` is committed, so the app runs without a C++ toolchain. You
+only need Emscripten if you change the engine:
+
+```bash
+brew install emscripten
+```
+
 ## How to add a skill
 
-All content lives in typed data files under `src/data/`. Nothing is hardcoded in a
-component.
+All content lives in typed data files under `src/data/`. Nothing is hardcoded in
+a component.
 
 1. Add an entry to `src/data/skills.ts`:
 
@@ -111,8 +173,8 @@ component.
 }
 ```
 
-2. Run the tests. They fail loudly if the id is duplicated, a prerequisite does not
-   exist, the summary is missing, or the new edge creates a **cycle**:
+2. Run the tests. They fail loudly if the id is duplicated, a prerequisite does
+   not exist, the summary is missing, or the new edge creates a **cycle**:
 
 ```bash
 npm run test
@@ -166,33 +228,41 @@ that way are stored with your progress, not in the repo.
 ## Project structure
 
 ```
+engine/                C++ matching engine
+  src/order_book.hpp   the engine — plain C++, no Emscripten, tests natively
+  src/bindings.cpp     the only file that knows JavaScript exists
+  tests/               72 assertions, no framework
+  Makefile             `make test` natively, `make wasm` for the browser
+public/engine/         the compiled .wasm and its loader (committed)
 src/
-  app/                 routes: / (Atlas), /dashboard, /settings
+  app/                 routes: / · /dashboard · /course · /orderbook · /settings
   components/
     atlas/             graph canvas, nodes, filter bar, side panel
     dashboard/         stat tiles, meter lists, chart, proof list
+    course/            the 100 Days tracker
+    orderbook/         depth ladder, learn panel, market-making game
     settings/          target date, export, import, reset
-  data/                domains, skills, paths, resources  ← all content
-  lib/                 graph logic, layout, dates, markdown, dashboard maths
+  data/                domains, skills, paths, resources, course  ← all content
+  lib/                 graph logic, layout, dates, markdown, engine bridge, game maths
   store/               Zustand progress store
-scripts/
-  check-links.ts       resource link checker
+scripts/check-links.ts resource link checker
 ```
 
 `src/lib/` is where the testable logic lives — status derivation, cycle detection,
-path closure, progress maths, recommendation ranking, pace, streaks, layout and the
-markdown parser are all pure functions with tests in `src/lib/__tests__/`.
+path closure, progress maths, recommendation ranking, pace, streaks, layout, the
+markdown parser and the market-making simulation are all pure functions with tests
+in `src/lib/__tests__/`.
 
 ## Deploying to Vercel
 
-The app is fully static — no database, no API routes, no environment variables.
+Fully static — no database, no API routes, no environment variables. The `.wasm`
+is committed, so Vercel needs no C++ toolchain.
 
 **From the dashboard**
 
 1. Push this repo to GitHub.
 2. At [vercel.com/new](https://vercel.com/new), import it.
-3. Accept the defaults — Vercel detects Next.js, builds with `npm run build`, and
-   serves from `.next`. There is nothing to configure.
+3. Accept the defaults — Vercel detects Next.js and builds with `npm run build`.
 4. Deploy.
 
 **From the CLI**
@@ -209,8 +279,12 @@ Because progress is per-browser `localStorage`, a deployed copy starts empty. To
 move progress to it, export JSON from Settings on the old machine and import it on
 the new one.
 
-## Decisions
+## Roadmap and decisions
 
-Non-obvious choices — layout algorithm, why filtering dims instead of hides, the
-chart hue, why the markdown parser is hand-written — are written up in
-[DECISIONS.md](DECISIONS.md).
+What is built, what is next and what was deliberately declined is in
+[ROADMAP.md](ROADMAP.md). Non-obvious engineering choices — the layout algorithm,
+why filtering dims instead of hides, why prices are integers, why the markdown
+parser is hand-written — are in [DECISIONS.md](DECISIONS.md), one section per phase.
+
+> Screenshots use sample progress. Replace them by dropping new files over the
+> images in `docs/screenshots/`.

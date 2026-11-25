@@ -7,7 +7,7 @@ work it describes, so the checkbox and the code can never drift apart.
 **Status key:** `[x]` shipped · `[~]` partly done · `[ ]` not started ·
 `[!]` blocked or needs a decision · `[–]` declined, with the reason
 
-Last updated: 25 November 2026 · 49 commits · 235 TS tests + 72 C++ checks · branch `main`
+Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · branch `main`
 
 ---
 
@@ -228,7 +228,8 @@ TypeScript · **Python** · **C++** — three languages, each earning its place.
 That is the diversity a recruiter sees before reading a word.
 
 ### Presentation
-- [ ] Architecture section in the README with a diagram — breadth nobody notices is breadth wasted
+- [x] README rewritten for phases 6–9, with a "what this demonstrates" section and
+      screenshots of the course tracker, the order book and the game
 - [ ] Consider a small monorepo (`apps/web`, `services/ingest`, `packages/engine`)
       so the structure itself shows the range
 - [ ] CI badge, test count, and a one-line "what this demonstrates" at the top
