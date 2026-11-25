@@ -1,0 +1,11 @@
+# Emscripten's loader is build output, not hand-written JavaScript. At 48KB it
+# would be the second-largest "language" in this repo — more than double the
+# C++ that actually produced it — and would misrepresent what is written here.
+public/engine/order_book.js   linguist-generated=true
+public/engine/order_book.wasm linguist-generated=true
+
+# Tests are real work and should count toward the language breakdown.
+engine/tests/*.cpp linguist-detectable=true
+
+# .hpp is ambiguous between C and C++; this engine is C++20.
+*.hpp linguist-language=C++
