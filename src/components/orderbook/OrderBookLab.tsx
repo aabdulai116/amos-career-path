@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Cpu, Play, RotateCcw, Trash2 } from "lucide-react";
+import { LearnPanel, type DemoOutcome } from "@/components/orderbook/LearnPanel";
+import type { LessonDemo } from "@/lib/orderbook-lessons";
 import {
   BUY,
   MatchingEngine,
@@ -91,6 +93,31 @@ export function OrderBookLab() {
     refresh(engine.market(marketSide, size));
   };
 
+  /**
+   * Run one of the explainer's demos against the real engine: clear the book,
+   * lay out the setup, then send the order the lesson is about.
+   */
+  const runDemo = useCallback((demo: LessonDemo): DemoOutcome => {
+    const engine = engineRef.current;
+    if (!engine) return { trades: [], restingAfter: 0 };
+
+    engine.clear();
+    setTape([]);
+    for (const order of demo.setup) {
+      engine.limit(order.side === "buy" ? BUY : SELL, order.price, order.quantity);
+    }
+    const trades = engine.limit(
+      demo.action.side === "buy" ? BUY : SELL,
+      demo.action.price,
+      demo.action.quantity,
+    );
+
+    const after = engine.snapshot(DEPTH);
+    setSnapshot(after);
+    if (trades.length > 0) setTape([...trades].reverse().slice(0, 12));
+    return { trades, restingAfter: after.restingOrders };
+  }, []);
+
   /** Drop a plausible book around 100.00 so there is something to trade. */
   const seedFlow = (): void => {
     const engine = engineRef.current;
@@ -179,6 +206,8 @@ export function OrderBookLab() {
 
       {status === "ready" && (
         <>
+          <LearnPanel onRunDemo={runDemo} />
+
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["Best bid", snapshot.bestBid === null ? "—" : formatTicks(snapshot.bestBid), BID],
