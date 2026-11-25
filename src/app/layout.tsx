@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Nav } from "@/components/Nav";
 import "./globals.css";
@@ -16,9 +16,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Amos Career Path",
+  title: {
+    default: "Amos Career Path",
+    template: "%s · Amos Career Path",
+  },
   description:
-    "A personal skill map for getting technically ready for summer 2028 internship recruiting.",
+    "A personal skill map for getting technically ready for summer 2028 internship recruiting, across software engineering, AI and quant.",
+  applicationName: "Amos Career Path",
+  robots: { index: false, follow: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0d12",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
