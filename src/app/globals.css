@@ -9,6 +9,13 @@
   --foreground: #e8edf5;
   --muted: #8d9bb0;
   --accent: #38bdf8;
+  /*
+   * Data marks get their own hue. The UI accent (#38bdf8) sits at OKLCH L 0.75,
+   * above the 0.48-0.67 band a mark needs on this surface; this step passes the
+   * lightness band and clears 3:1 against --surface.
+   */
+  --chart-series: #2d9fd4;
+  --chart-grid: #1e2835;
 }
 
 @theme inline {
@@ -19,6 +26,8 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-chart-series: var(--chart-series);
+  --color-chart-grid: var(--chart-grid);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
