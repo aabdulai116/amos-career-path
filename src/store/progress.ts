@@ -4,7 +4,21 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { stamp } from "@/store/stamp";
 import { dayKey } from "@/lib/dates";
+import {
+  DEFAULT_RECRUITING_DATE,
+  initialState,
+  parseProgressState,
+  STORAGE_KEY,
+} from "@/lib/progress-state";
 import { normaliseCompany } from "@/lib/internships";
+// Re-exported so the many existing imports from this module keep working.
+export {
+  DEFAULT_RECRUITING_DATE,
+  initialState,
+  parseProgressState,
+  STORAGE_KEY,
+};
+
 import type {
   ApplicationProgress,
   ApplicationStage,
@@ -18,8 +32,6 @@ import type {
   SkillProgress,
 } from "@/lib/types";
 
-export const DEFAULT_RECRUITING_DATE = "2027-08-01";
-export const STORAGE_KEY = "amos-career-path:progress:v1";
 
 const emptySkill = (): SkillProgress => ({
   notes: "",
@@ -53,21 +65,6 @@ const emptyDay = (): DayProgress => ({
   completedAt: null,
 });
 
-export const initialState: ProgressState = {
-  version: 1,
-  skills: {},
-  course: {},
-  problems: {},
-  companies: {},
-  applications: {},
-  customResources: [],
-  dayLogs: {},
-  settings: {
-    recruitingDate: DEFAULT_RECRUITING_DATE,
-    selectedPathId: null,
-    internshipsSeenAt: null,
-  },
-};
 
 interface Actions {
   /** False until the persisted state has been read back from localStorage. */
@@ -139,68 +136,6 @@ const touchDay = (
   };
 };
 
-/** Shape check for imported JSON; anything unrecognised is rejected, not merged. */
-export const parseProgressState = (
-  raw: unknown,
-): { ok: true; state: ProgressState } | { ok: false; error: string } => {
-  if (typeof raw !== "object" || raw === null) {
-    return { ok: false, error: "File is not a JSON object." };
-  }
-  const value = raw as Partial<ProgressState>;
-  if (value.version !== 1) {
-    return { ok: false, error: `Unsupported version: ${String(value.version)}.` };
-  }
-  if (typeof value.skills !== "object" || value.skills === null) {
-    return { ok: false, error: "Missing a skills object." };
-  }
-  return {
-    ok: true,
-    state: {
-      version: 1,
-      skills: value.skills,
-      // Exports written before the course tracker existed simply have none.
-      course:
-        typeof value.course === "object" && value.course !== null
-          ? value.course
-          : {},
-      // Exports written before the practice tracker existed simply have none.
-      problems:
-        typeof value.problems === "object" && value.problems !== null
-          ? value.problems
-          : {},
-      // Exports written before the internships page existed simply have none.
-      companies:
-        typeof value.companies === "object" && value.companies !== null
-          ? value.companies
-          : {},
-      applications:
-        typeof value.applications === "object" && value.applications !== null
-          ? value.applications
-          : {},
-      customResources: Array.isArray(value.customResources)
-        ? value.customResources
-        : [],
-      dayLogs:
-        typeof value.dayLogs === "object" && value.dayLogs !== null
-          ? value.dayLogs
-          : {},
-      settings: {
-        recruitingDate:
-          typeof value.settings?.recruitingDate === "string"
-            ? value.settings.recruitingDate
-            : DEFAULT_RECRUITING_DATE,
-        selectedPathId:
-          typeof value.settings?.selectedPathId === "string"
-            ? value.settings.selectedPathId
-            : null,
-        internshipsSeenAt:
-          typeof value.settings?.internshipsSeenAt === "string"
-            ? value.settings.internshipsSeenAt
-            : null,
-      },
-    },
-  };
-};
 
 export const useProgress = create<ProgressStore>()(
   persist(

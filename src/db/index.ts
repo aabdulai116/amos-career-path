@@ -1,14 +1,26 @@
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
+import { Pool as NeonPool, neonConfig } from "@neondatabase/serverless";
+import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless";
+import { drizzle as drizzleNode } from "drizzle-orm/node-postgres";
+import { Pool as NodePool } from "pg";
 import ws from "ws";
 import * as schema from "@/db/schema";
 
-// The HTTP driver is a round trip per statement and, more importantly, throws
-// "No transactions support" the moment you open one. Saving a user's progress
-// replaces several tables at once and must not be able to half-succeed, so
-// this uses the WebSocket pool, which gives real transactions - and matches
-// what the tests run against, so they exercise the production path.
+// Neon's HTTP driver is a round trip per statement and, more importantly,
+// throws "No transactions support" the moment you open one. Saving a user's
+// progress replaces several tables at once and must not half-succeed, so the
+// Neon path uses the WebSocket pool, which gives real transactions.
 neonConfig.webSocketConstructor = ws;
+
+/**
+ * Neon's driver speaks WebSocket to Neon's endpoint and cannot talk to an
+ * ordinary Postgres, so pointing DATABASE_URL at localhost silently fails.
+ * The driver is therefore chosen from the host: Neon in production, plain
+ * node-postgres for a local database or any other provider. Both give real
+ * transactions, so the behaviour is the same either way.
+ */
+export const isNeonUrl = (url: string): boolean =>
+  /[.@]neon\.tech[:/]?|\.neon\.build/.test(url) ||
+  url.includes("neon.tech");
 
 /**
  * The database connection, and the decision that the database is optional.
@@ -22,7 +34,7 @@ neonConfig.webSocketConstructor = ws;
  * Every server path therefore has to cope with getDb() returning null.
  */
 
-export type Database = ReturnType<typeof drizzle<typeof schema>>;
+export type Database = ReturnType<typeof drizzleNeon<typeof schema>>;
 
 let cached: Database | null = null;
 
@@ -37,7 +49,11 @@ export const getDb = (): Database | null => {
   if (cached !== null) return cached;
   const url = databaseUrl();
   if (url === null) return null;
-  cached = drizzle(new Pool({ connectionString: url }), { schema });
+  cached = isNeonUrl(url)
+    ? drizzleNeon(new NeonPool({ connectionString: url }), { schema })
+    : (drizzleNode(new NodePool({ connectionString: url }), {
+        schema,
+      }) as unknown as Database);
   return cached;
 };
 

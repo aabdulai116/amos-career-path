@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { getDb } from "@/db";
 import { mergeProgress } from "@/lib/sync";
 import { loadProgress, saveProgress } from "@/server/progress";
-import { parseProgressState } from "@/store/progress";
+import { parseProgressState } from "@/lib/progress-state";
 
 /**
  * One endpoint, one round trip: the client posts what it has, the server

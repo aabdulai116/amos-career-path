@@ -662,3 +662,41 @@ dependency, taking the project from zero vulnerabilities to four. The suggested
 fix was a major downgrade of drizzle-kit. An `overrides` entry forcing a
 patched esbuild fixed it instead, and generating the migration afterwards
 proved drizzle-kit still works.
+
+### Phase 13, addendum — what running it found
+
+Four green checks are not the same as a working feature. Typecheck, lint, the
+production build and 463 tests all passed on a sync endpoint that returned 500
+to every request. These were found by standing up a real Postgres, seeding a
+real session row and actually using the thing.
+
+**The sync route imported its validator from a "use client" module.** Next
+throws at runtime — "Attempted to call parseProgressState() from the server" —
+and nothing static catches it, because it is a framework boundary rather than
+a type error. `src/server/progress.ts` had the same fault in a path that had
+not run yet. The shared pieces moved to `src/lib/progress-state.ts`, which
+belongs to neither side, and a test now walks every file under `src/server`
+and `src/app/api` and fails if any of them imports a client module.
+
+**The account page showed "accounts are not switched on" to a signed-in user.**
+The provider check came before the signed-in check, so a session with no
+configured providers fell into the wrong branch. In practice that is what
+happens the moment a provider's credentials are rotated: everyone already
+signed in would lose their sync controls and, worse, the delete button.
+Signed in now wins.
+
+**The Neon driver cannot talk to a local Postgres**, so pointing DATABASE_URL
+at localhost failed silently and local development was impossible. The driver
+is now chosen from the host — Neon's WebSocket pool for Neon, node-postgres
+for anything else. Both give real transactions, so behaviour does not change.
+
+**Measured rather than guessed.** On a heavy user — 531 rows, 225 KB of JSON —
+one sync is about 20 ms and a load 8 ms; 25 users syncing at once take 244 ms
+in total, roughly 10 ms each, so it scales flat rather than falling over. That
+is a local Postgres on a laptop, so a hosted database adds network latency,
+but the shape holds.
+
+The real weakness it exposed is not speed, it is write amplification: every
+sync deletes and reinserts all 531 rows even when one note changed. That is
+fine at tens of users and is the first thing that will hurt at hundreds.
+`npm run db:loadtest` is the script that measures it.

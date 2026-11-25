@@ -59,21 +59,11 @@ export function AccountPanel({ providers }: { providers: string[] }) {
         </p>
       </header>
 
-      {providers.length === 0 ? (
-        <section className="rounded-xl border border-[#ad7510] bg-[var(--surface)] p-5">
-          <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <AlertTriangle className="size-4 text-[#ad7510]" aria-hidden />
-            Accounts are not switched on
-          </h2>
-          <p className="mt-1.5 text-xs leading-relaxed text-[var(--muted)]">
-            No sign-in provider is configured, so this deployment is
-            browser-only. That is a working mode, not a broken one — nothing
-            else on the site needs an account. See{" "}
-            <code className="font-mono">docs/SETUP.md</code> for how to turn
-            accounts on.
-          </p>
-        </section>
-      ) : signedIn ? (
+      {/* Signed in wins over "no providers". A session is an account, and if a
+          provider's credentials are ever rotated or removed, the people
+          already signed in must keep their sync controls and their delete
+          button rather than being told accounts do not exist. */}
+      {signedIn ? (
         <>
           <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
             <div className="flex flex-wrap items-center gap-3">
@@ -196,6 +186,20 @@ export function AccountPanel({ providers }: { providers: string[] }) {
             )}
           </section>
         </>
+      ) : providers.length === 0 ? (
+        <section className="rounded-xl border border-[#ad7510] bg-[var(--surface)] p-5">
+          <h2 className="flex items-center gap-2 text-sm font-semibold">
+            <AlertTriangle className="size-4 text-[#ad7510]" aria-hidden />
+            Accounts are not switched on
+          </h2>
+          <p className="mt-1.5 text-xs leading-relaxed text-[var(--muted)]">
+            No sign-in provider is configured, so this deployment is
+            browser-only. That is a working mode, not a broken one — nothing
+            else on the site needs an account. See{" "}
+            <code className="font-mono">docs/SETUP.md</code> for how to turn
+            accounts on.
+          </p>
+        </section>
       ) : (
         <>
           <section className="space-y-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { schema } from "@/db";
-import { DEFAULT_RECRUITING_DATE, initialState } from "@/store/progress";
+import { DEFAULT_RECRUITING_DATE, initialState } from "@/lib/progress-state";
 import type { ProgressState } from "@/lib/types";
 
 /**

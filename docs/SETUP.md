@@ -14,6 +14,11 @@ accounts and secrets.
 
 [Neon](https://console.neon.tech) — free tier, no card.
 
+Any Postgres works: the driver is chosen from the host, so a local
+`postgresql://localhost:5432/...` uses node-postgres and a Neon URL uses
+Neon's WebSocket pool. That means you can develop against a local database
+without signing up for anything.
+
 1. Create a project. Any region near you.
 2. Copy the **pooled** connection string (it has `-pooler` in the host).
 3. Put it in `.env.local` as `DATABASE_URL`.
