@@ -7,7 +7,7 @@ work it describes, so the checkbox and the code can never drift apart.
 **Status key:** `[x]` shipped · `[~]` partly done · `[ ]` not started ·
 `[!]` blocked or needs a decision · `[–]` declined, with the reason
 
-Last updated: 25 November 2026 · 42 commits · 197 TS tests + 72 C++ checks · branch `main`
+Last updated: 25 November 2026 · 49 commits · 235 TS tests + 72 C++ checks · branch `main`
 
 ---
 
@@ -70,7 +70,7 @@ Last updated: 25 November 2026 · 42 commits · 197 TS tests + 72 C++ checks · 
 - [x] Compiled to WebAssembly with Emscripten + embind — `npm run build:engine`
 - [x] Typed TypeScript bridge, no wasm details leaking into React
 - [x] Depth ladder, live stats, order entry, trade tape, imbalance bar
-- [ ] Market-making game on top of the engine (next)
+- [x] Market-making game on top of the engine — quote, get filled, manage inventory, scored on adverse selection
 
 ### Phase 6 — 100 Days of Code tracker
 - [x] All 102 sections as data — titles, lecture counts, run times (sums to 57hr ✓)

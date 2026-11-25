@@ -331,3 +331,38 @@ The first version called `onRunDemo(demo)` inside `setRan`'s updater function.
 React runs updaters during render, so the demo was executing — and setting state
 on the parent — mid-render. Typecheck and lint both passed; only the browser
 console caught it. Running the demo first and storing the plain result fixes it.
+
+## Phase 9 — The market-making game
+
+**The engine decides the fills, the game only decides what they cost.**
+Each round places your quote as two resting limit orders in the C++ book, then
+sends each counterparty through as a market order. The fills come back from the
+matching engine. Nothing in the TypeScript decides who traded — which means the
+game cannot drift away from the engine's actual behaviour.
+
+**Seeded randomness.**
+mulberry32 for the uniform draws and Box-Muller on top for the value walk, with
+the generator state carried through the game state rather than held in a module
+variable. A game is therefore reproducible, and the tests are not flaky — one of
+them checks 4,000 normal draws have mean near 0 and standard deviation near 1.
+
+**Adverse selection is the whole lesson, so it is modelled explicitly.**
+An informed counterparty sees the true value and only deals when your quote is
+on the wrong side of it: they lift an ask that is too cheap or hit a bid that is
+too dear. Everyone else is noise. Quote tight and you trade more, but a larger
+share of what you trade is with someone who knows more than you.
+
+**Inventory is closed out at the true value when the game ends.**
+Carrying a position to the bell is a directional bet, not market making, and the
+score should say so. The summary reports worst position alongside profit for the
+same reason — a good number reached by taking risk is not the same skill.
+
+**Spread captured and picked off are reported separately.**
+Total profit hides the trade-off. Spread captured is what quoting earned; picked
+off counts the fills the value immediately moved against. The interesting
+question is the ratio, not the total.
+
+**Verified by playing a full game.** Twenty rounds, 102 lots, final score +510.
+The score equalled spread captured exactly, which only happens when the position
+ends flat — and with a fixed 99.95/100.05 quote that is 5 ticks × 102 lots = 510.
+The accounting checks out by hand, which is the point of keeping it pure.
