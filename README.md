@@ -25,44 +25,25 @@ TypeScript · Python · C++ · PostgreSQL · WebAssembly
 
 ## Why I built this
 
-I arrived as a freshman with no idea where to start. There was no computer
-science club to join, nobody a year ahead to ask, and no list anywhere that
-said *here is the order*. So I worked it out alone, slowly — and the slow part
-was never the learning. It was not knowing what to learn next, or whether I
-was already behind.
+I came in as a freshman with no idea where to start. There was no CS club to
+join and nobody a year ahead to ask, so I worked it out alone. That took a
+long time, and the slow part was never the learning. It was not knowing what
+to learn next, or whether I was already behind.
 
-The thing a checklist cannot tell you is that skills depend on each other.
-Stochastic calculus is pointless before probability. Low-latency C++ is
-pointless before you understand memory. You can tick twenty boxes in the wrong
-order and still walk into an interview unprepared, which is roughly what I did
-for a semester.
+A checklist cannot fix that, because skills depend on each other. Probability
+before stochastic calculus. Memory before low-latency C++. You can tick twenty
+boxes in the wrong order and still walk into an interview unprepared.
 
-So CareerCompass models the dependencies explicitly. The map knows what each
-finished skill unlocks, the dashboard knows how many weeks are left before
-applications open, and the recommended list ranks what you can start today by
-how much of the map it opens up. The proof-of-work list exists because a skill
-I cannot point to a repository for is not a skill I can put on a CV.
+So this maps the dependencies instead. It knows what each finished skill
+unlocks, how many weeks are left before applications open, and what is worth
+starting today.
 
-**The part I most needed, and nobody told me, is that changing your mind is
-cheap.** Choose quant in September and realise by November that you would
-rather build things people can see — you have not wasted the term. The paths
-overlap heavily, and the app shows you exactly which skills carry over and
-which are genuinely new. I assumed back then that picking wrong meant starting
-again. It does not, and seeing that on a map is the difference between
-switching early and grinding on at something you have stopped enjoying.
+The part I needed most is that changing your mind is cheap. Pick quant in
+September, switch in November, and most of what you learned still counts. The
+paths overlap, and the app shows you which skills carry over. I did not know
+that back then. I thought picking wrong meant starting again.
 
-That is who this is for now: the first-year who is where I was. Open **Start
-here**, answer six questions, and leave with one direction and five concrete
-things to do this week. No account needed to look around, nothing to pay, and
-nothing that assumes you already know the vocabulary.
-
-I kept building it past the point of a tracker because the gap I felt was never
-only informational. It was not having anything to show. So the practice page
-runs real CPython in the browser, the order book is a C++ matching engine
-compiled to WebAssembly, and the internship board is fed by a Python worker
-that is honest about what the data cannot tell you. Those exist because I
-wanted to learn how to build them — and because a project you can open beats a
-line on a CV that says you know the words.
+It is for the next first-year who is where I was.
 
 ## What is in it
 
