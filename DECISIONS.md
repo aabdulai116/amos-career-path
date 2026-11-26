@@ -767,3 +767,40 @@ wall, so three videos came back `playabilityStatus LOGIN_REQUIRED` in CI and
 video is gone", so it is now reported as needing a human, alongside the sites
 that refuse automated requests outright. A check that always fails is worse
 than no check.
+
+## Phase 15 — the difference between "works" and "works for other people"
+
+**A crash showed a blank white page.** No error boundary existed anywhere, so
+any thrown error in production rendered nothing at all: no explanation, no way
+back, and no clue whether the person's work had survived. There are now three
+— a page-level one, a 404, and a global one for the case where the root layout
+itself fails and cannot rely on the app's fonts or CSS having loaded. All three
+lead with the only thing anyone actually wants to know, which is that their
+progress is safe.
+
+**The social card is generated, not a checked-in PNG**, so it cannot go stale
+against the app's colours. A link pasted into a group chat with no title and no
+image reads as something not to click, which is a bad first impression when the
+next thing you ask for is a university sign-in.
+
+**Indexing was off.** `robots: { index: false }` made sense for a private
+tool; it is wrong for one meant to reach other students. Now on.
+
+**A first visit landed on the Atlas** — ninety-seven skills and nine paths at
+once, which is precisely the wall the intake was built to avoid. A hard
+redirect would have been worse: it would hijack a link someone deliberately
+sent to a specific page. So it is a dismissible bar, and dismissing it counts
+as "asked and answered" forever.
+
+**A feedback link, because the alternative is silence.** A first-year hits a
+bug, assumes they did something wrong, and leaves without telling anyone. The
+issue is prefilled with the page and the browser and nothing else — a bug
+report should not quietly carry someone's data off their machine.
+
+**Which caused a hydration mismatch, found by looking.** Reading
+`navigator.userAgent` during render produced a different href on the server
+than in the browser, and React said so. `useSyncExternalStore` with an empty
+server snapshot is the sanctioned fix: React uses the server value while
+hydrating and swaps in the real one after. Verified by diffing the
+server-rendered HTML against the live DOM rather than trusting the console,
+which was showing stale messages from before the fix.
