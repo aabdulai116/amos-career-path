@@ -17,30 +17,44 @@ import { getDb, schema } from "@/db";
  * app builds and runs with none of them set - it simply has no sign-in button.
  */
 
+/**
+ * An env var that is present but empty is not a value.
+ *
+ * `process.env.X ?? undefined` only catches null and undefined, so a blank
+ * `X=` in .env or in a hosting dashboard arrives as "" and is passed straight
+ * through. Auth.js then takes that empty string as the issuer rather than
+ * falling back to its default, and OpenID discovery fails with an error that
+ * says nothing about the real cause. .env.example ships these keys blank, so
+ * this is the normal case, not an edge one.
+ */
+const env = (name: string): string | undefined => {
+  const value = process.env[name];
+  return typeof value === "string" && value.trim() !== "" ? value : undefined;
+};
+
 const providers = (): Provider[] => {
   const list: Provider[] = [];
 
-  if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
-    list.push(
-      Google({
-        clientId: process.env.AUTH_GOOGLE_ID,
-        clientSecret: process.env.AUTH_GOOGLE_SECRET,
-      }),
-    );
+  const googleId = env("AUTH_GOOGLE_ID");
+  const googleSecret = env("AUTH_GOOGLE_SECRET");
+  if (googleId && googleSecret) {
+    list.push(Google({ clientId: googleId, clientSecret: googleSecret }));
   }
 
-  if (
-    process.env.AUTH_MICROSOFT_ENTRA_ID_ID &&
-    process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET
-  ) {
+  const microsoftId = env("AUTH_MICROSOFT_ENTRA_ID_ID");
+  const microsoftSecret = env("AUTH_MICROSOFT_ENTRA_ID_SECRET");
+  if (microsoftId && microsoftSecret) {
     list.push(
       MicrosoftEntraID({
-        clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
-        clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+        clientId: microsoftId,
+        clientSecret: microsoftSecret,
         // "common" lets both personal Outlook accounts and university
         // Microsoft accounts in. A tenant-specific id would lock it to one
         // university, which is the opposite of the point.
-        issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER ?? undefined,
+        // Omitted, Auth.js defaults to the /common/ endpoint, which is what
+        // lets both university accounts and personal Outlook addresses in.
+        // Only set this to pin the app to a single university's tenant.
+        issuer: env("AUTH_MICROSOFT_ENTRA_ID_ISSUER"),
       }),
     );
   }
