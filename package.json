@@ -16,6 +16,7 @@
     "test:worker": "python3 -m unittest discover -s worker/tests -t worker",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:verify": "tsx scripts/verify-db.ts",
     "db:loadtest": "tsx scripts/loadtest.ts",
     "test:engine": "make -C engine test",
     "build:engine": "make -C engine wasm"

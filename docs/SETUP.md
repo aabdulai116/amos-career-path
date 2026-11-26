@@ -23,11 +23,19 @@ without signing up for anything.
 2. Copy the **pooled** connection string (it has `-pooler` in the host).
 3. Put it in `.env.local` as `DATABASE_URL`.
 
-Then create the tables:
+Then create the tables and check them:
 
 ```bash
-npx drizzle-kit migrate
+npm run db:migrate
 ```
+
+```bash
+npm run db:verify
+```
+
+`db:verify` lists the thirteen tables the app expects and says which are
+missing. Run it any time sync misbehaves and you want to know whether the
+database or the app is at fault. It never prints the password.
 
 The migration in `drizzle/` is committed, so this applies exactly what the
 tests ran against — no schema drift between your database and CI.
