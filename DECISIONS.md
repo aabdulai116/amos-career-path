@@ -872,3 +872,25 @@ understand directory indexes. And a content grep for AI-tool traces matched
 `resources.ts` and the internships data, which turned out to be a Karpathy
 video titled "Deep Dive into LLMs like ChatGPT" and 21 genuine job titles.
 Neither was changed.
+
+### Phase 17, second pass
+
+A second sweep from angles the first one did not cover.
+
+**Five unused Next.js starter SVGs** were still in `public/` — `next.svg`,
+`vercel.svg`, `file.svg`, `globe.svg`, `window.svg`. Nothing referenced them.
+They are the tell of a scaffolded project nobody tidied, which is not the
+impression this repo should give, and they were bytes served for nothing.
+
+**Clean on the rest**, each checked rather than assumed: every resource points
+at a skill that exists; the generated internships file still satisfies the
+app's own validator; the migrations apply from nothing on a fresh Postgres; no
+secret appears in any tracked file or anywhere in the full commit history; the
+client bundle is 1.3 MB raw and roughly 360 KB gzipped, with the 1.1 MB
+internships file correctly outside it in `public/`; and a fresh production
+server renders all eleven pages with no error text leaking into the HTML.
+
+**Why GitHub still showed `.claude` and the vulnerable `ws`.** Both were fixed
+locally in commits that the sandbox kept refusing to push. The fix was real;
+the push was the blocker. Worth recording because "it still looks broken on
+GitHub" and "it is still broken" are different problems with different causes.
