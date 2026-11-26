@@ -92,7 +92,11 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 - [x] Nav scrolls on a phone now there are ten destinations
 
 ### Phase 13 — accounts, sync and CI, shipped
-- [x] Sign in with Google or Microsoft (Auth.js v5), no passwords
+- [x] Sign in with Google (Auth.js v5), no passwords
+- [–] **Microsoft sign-in** — code is ready, but Microsoft now requires a paid
+      Azure account to register an app at all, university tenants refuse
+      students, and registering in someone else's directory is not ours to do.
+      Costs almost nothing to skip: Outlook users sign in with Google
 - [x] Neon Postgres with Drizzle, twelve tables, migrations committed
 - [x] Sync: one endpoint, server-side merge, last-write-wins per record
 - [x] A Zustand middleware that timestamps changed records in one place

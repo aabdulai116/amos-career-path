@@ -216,8 +216,10 @@ opening a shared link gets the whole app with nothing to sign up for. That is
 the default on purpose: a signup wall is how a tool meant for first-years ends
 up used by nobody.
 
-Signing in with Google or Microsoft moves the same data somewhere it survives
-a cleared cache or a new laptop. There are no passwords, so there are none to
+Signing in with Google moves the same data somewhere it survives a cleared
+cache or a new laptop. Microsoft sign-in is wired up but not switched on:
+Microsoft now requires a paid Azure account to register an app at all, which
+is a poor trade for a second button. See docs/SETUP.md. There are no passwords, so there are none to
 leak and no reset flow to build.
 
 **Sync is one endpoint and one round trip.** The browser posts its whole
@@ -251,7 +253,7 @@ inline confirm.
 | Python | Pyodide 314.0.8 (CPython 3.14 → WebAssembly), in a Web Worker |
 | State | Zustand, persisted to `localStorage` |
 | Tests | Vitest (516), `unittest` (46) and a dependency-free C++ runner (72 assertions) |
-| Auth | Auth.js v5 — Google and Microsoft, no passwords |
+| Auth | Auth.js v5 — Google, no passwords (Microsoft supported, see SETUP) |
 | Database | Neon Postgres with Drizzle ORM and committed migrations |
 | Deploy | Vercel |
 

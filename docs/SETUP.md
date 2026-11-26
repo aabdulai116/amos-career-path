@@ -70,24 +70,44 @@ like a password and use a different one in production.
 
 ---
 
-## 4. Microsoft / Outlook sign-in
+## 4. Microsoft / Outlook sign-in — currently not worth it
 
-[entra.microsoft.com](https://entra.microsoft.com) → App registrations → New
-registration.
+**Skip this.** Google sign-in is enough, and Microsoft now charges a toll to
+get in the door. Recorded here so the next person does not spend an evening
+discovering it.
 
-1. **Supported account types**: choose *Accounts in any organizational
-   directory and personal Microsoft accounts*. This is the setting that
-   matters — anything narrower locks it to one university and shuts out
-   personal Outlook addresses.
-2. **Redirect URI**: Web →
-   `https://YOUR-DOMAIN/api/auth/callback/microsoft-entra-id`
-   (add the localhost one too while developing).
-3. **Certificates & secrets** → New client secret → copy the *Value*, not the
-   Secret ID. It is shown once.
-4. Put them in `AUTH_MICROSOFT_ENTRA_ID_ID` and
-   `AUTH_MICROSOFT_ENTRA_ID_SECRET`.
+Microsoft has closed the three routes a student would take:
 
----
+- **Registering an app outside a directory** is deprecated. The Entra admin
+  centre says so plainly: "The ability to create applications outside of a
+  directory has been deprecated."
+- **Creating your own free tenant** is no longer free. Microsoft's own
+  documentation: *"Only paid customers can create a new Workforce tenant in
+  Microsoft Entra ID. Customers using a free tenant, or a trial subscription
+  won't be able to create additional tenants."* The app-registration
+  quickstart lists "an Azure account that has an active subscription" as a
+  prerequisite.
+- **A university tenant** will refuse you. Students are not Application
+  Developers in their university's directory, which is why a `.edu` login
+  returns "you don't have access". That is the university's policy and the
+  right one.
+
+A personal Outlook account that has ever been invited to someone's
+organisation will offer to register the app *in that organisation's
+directory*. Do not. It is not your tenant, the administrator can delete your
+app without warning, and putting a personal side project in an organisation's
+identity directory is not yours to do.
+
+**What this costs you: almost nothing.** Anyone with an Outlook address can
+still sign in with Google, and many universities block third-party app consent
+on their Microsoft tenants anyway, so a `.edu` Microsoft login would often be
+refused by their own IT.
+
+The code is ready if this ever changes: set `AUTH_MICROSOFT_ENTRA_ID_ID` and
+`AUTH_MICROSOFT_ENTRA_ID_SECRET` and the button appears by itself. Leave the
+issuer blank so it uses the `/common/` endpoint, which admits both
+organisational and personal accounts. Redirect URI:
+`https://YOUR-DOMAIN/api/auth/callback/microsoft-entra-id`
 
 ## 5. Deploy
 
