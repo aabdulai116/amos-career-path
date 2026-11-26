@@ -204,7 +204,9 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 - [–] **Microsoft Entra** — blocked by Microsoft, see docs/SETUP.md
 - [x] **Neon database created**, 13 tables migrated, zero drift against the
       committed migrations
-- [ ] **Rewrite "why I built this" in the README** — my text is a marked placeholder
+- [x] **"Why I built this" written** — Amos's own reason: arriving with no
+      club, no list and no one to ask, and wanting the next first-year to
+      have the map he did not
 
 ---
 

@@ -25,19 +25,44 @@ TypeScript · Python · C++ · PostgreSQL · WebAssembly
 
 ## Why I built this
 
-*(Placeholder — rewrite this in your own words.)*
+I arrived as a freshman with no idea where to start. There was no computer
+science club to join, nobody a year ahead to ask, and no list anywhere that
+said *here is the order*. So I worked it out alone, slowly — and the slow part
+was never the learning. It was not knowing what to learn next, or whether I
+was already behind.
 
-I kept a reading list, a LeetCode list, a half-finished Notion board and a vague
-sense of what I "should" learn before applications open, and none of them told me
-the one thing I actually wanted to know: **what should I work on today, and am I
-moving fast enough?** A flat checklist cannot answer that, because skills are not
-independent — stochastic calculus is pointless before probability, and low-latency
-C++ is pointless before you understand memory.
+The thing a checklist cannot tell you is that skills depend on each other.
+Stochastic calculus is pointless before probability. Low-latency C++ is
+pointless before you understand memory. You can tick twenty boxes in the wrong
+order and still walk into an interview unprepared, which is roughly what I did
+for a semester.
 
-So this models the dependencies explicitly. The map knows what is unlocked, the
-dashboard knows how many weeks are left, and the recommendation list ranks what is
-available by how much of the map it opens up. The proof-of-work list exists because
-a skill I cannot point to a repo for is not a skill I can put on a resume.
+So CareerCompass models the dependencies explicitly. The map knows what each
+finished skill unlocks, the dashboard knows how many weeks are left before
+applications open, and the recommended list ranks what you can start today by
+how much of the map it opens up. The proof-of-work list exists because a skill
+I cannot point to a repository for is not a skill I can put on a CV.
+
+**The part I most needed, and nobody told me, is that changing your mind is
+cheap.** Choose quant in September and realise by November that you would
+rather build things people can see — you have not wasted the term. The paths
+overlap heavily, and the app shows you exactly which skills carry over and
+which are genuinely new. I assumed back then that picking wrong meant starting
+again. It does not, and seeing that on a map is the difference between
+switching early and grinding on at something you have stopped enjoying.
+
+That is who this is for now: the first-year who is where I was. Open **Start
+here**, answer six questions, and leave with one direction and five concrete
+things to do this week. No account needed to look around, nothing to pay, and
+nothing that assumes you already know the vocabulary.
+
+I kept building it past the point of a tracker because the gap I felt was never
+only informational. It was not having anything to show. So the practice page
+runs real CPython in the browser, the order book is a C++ matching engine
+compiled to WebAssembly, and the internship board is fed by a Python worker
+that is honest about what the data cannot tell you. Those exist because I
+wanted to learn how to build them — and because a project you can open beats a
+line on a CV that says you know the words.
 
 ## What is in it
 
