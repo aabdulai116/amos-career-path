@@ -23,7 +23,7 @@ import { skillById } from "../src/data/skills";
 const TIMEOUT_MS = 20_000;
 const CONCURRENCY = 6;
 /** Generic client name; no personal details go out with these requests. */
-const USER_AGENT = "amos-career-path-link-checker/1.0";
+const USER_AGENT = "career-compass-link-checker/1.0";
 
 type Verdict = "ok" | "warn" | "dead";
 

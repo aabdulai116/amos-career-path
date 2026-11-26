@@ -804,3 +804,29 @@ server snapshot is the sanctioned fix: React uses the server value while
 hydrating and swaps in the real one after. Verified by diffing the
 server-rendered HTML against the live DOM rather than trusting the console,
 which was showing stale messages from before the fix.
+
+## Phase 16 — renamed to CareerCompass
+
+**The localStorage key kept the old slug, deliberately.** Everything visible
+is now CareerCompass and the GitHub repo is `career-compass`, but
+`STORAGE_KEY` is still `amos-career-path:progress:v1`. Renaming it would not
+migrate anything: it would hand every existing user a blank app and orphan
+their real work under a key nothing reads. It is invisible, so there is no
+reason to touch it, and the constant now carries a comment saying so before
+somebody tidies it.
+
+**The workspace launch.json was left alone too.** It points at the folder on
+disk, which has not been renamed, so "fixing" the name there would break the
+dev server for no gain.
+
+**Checked rather than assumed.** All eleven pages were walked the way a user
+walks them - clicking the nav, not fetching HTML - with a console collector
+installed first: zero errors. The dashboard turned out to be the one page
+with no `<h1>`, which is what a screen reader announces on arrival, so it has
+a visually hidden one now.
+
+**One reported problem that was not one.** An accessibility sweep flagged two
+unlabelled checkboxes on the internships page. They are wrapped in `<label>`
+elements, which is valid implicit labelling; `input.labels` - the browser's
+own computation - returns "Hide roles needing citizenship" and "Open to a
+bachelor's". The detector was wrong, not the markup, and nothing was changed.

@@ -61,7 +61,7 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 - [x] Real screenshots in `docs/screenshots/`
 - [x] Vercel deploy instructions, both dashboard and CLI
 - [x] Mobile fixes, keyboard path verified, app icon, metadata, `noindex`
-- [x] Repo public at github.com/aabdulai116/amos-career-path, commits authored by you only
+- [x] Repo public at github.com/aabdulai116/career-compass, commits authored by you only
 
 ### Phase 7 — C++ order book (WebAssembly)
 - [x] Price-time priority matching engine in C++20, 293 lines, no dependencies
@@ -78,7 +78,7 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 - [x] Site is findable now (robots index was off)
 - [x] First-run bar pointing newcomers at the intake instead of the Atlas wall
 - [x] Feedback link that opens a prefilled issue with the page and browser
-- [ ] Rename for a shared audience — needs a name from you
+- [x] Renamed to CareerCompass, GitHub repo renamed to career-compass
 
 ### Phase 14 — onboarding, opportunities, privacy and scale, shipped
 - [x] **Start here**: a six-question intake that suggests a path and five

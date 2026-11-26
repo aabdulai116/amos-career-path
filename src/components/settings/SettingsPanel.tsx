@@ -45,7 +45,7 @@ export function SettingsPanel() {
     const link = document.createElement("a");
     const stamp = new Date().toISOString().slice(0, 10);
     link.href = url;
-    link.download = `amos-career-path-progress-${stamp}.json`;
+    link.download = `career-compass-progress-${stamp}.json`;
     link.click();
     URL.revokeObjectURL(url);
     setNotice({ tone: "ok", message: `Exported ${tracked} tracked skills.` });

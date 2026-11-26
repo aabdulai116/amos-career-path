@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { MessageSquareWarning } from "lucide-react";
 
-const REPO = "https://github.com/aabdulai116/amos-career-path";
+const REPO = "https://github.com/aabdulai116/career-compass";
 
 /**
  * A way for someone who is not me to report that something broke.

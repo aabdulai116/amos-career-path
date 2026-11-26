@@ -64,6 +64,12 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 px-5 py-6">
+      {/* Every page needs a top-level heading: it is what a screen reader
+          announces on arrival and what "jump to main content" lands on. This
+          page was the only one without one. Visually hidden because the page
+          is a wall of figures that already explain themselves. */}
+      <h1 className="sr-only">Dashboard</h1>
+
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-[11px] tracking-wider text-[var(--muted)] uppercase">
           Tracking

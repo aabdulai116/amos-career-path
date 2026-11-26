@@ -12,6 +12,14 @@ import type { ProgressState } from "@/lib/types";
  */
 
 export const DEFAULT_RECRUITING_DATE = "2027-08-01";
+/**
+ * Deliberately still the old slug. The app was renamed to CareerCompass, but
+ * this key is where every existing user's progress physically lives in their
+ * browser. Renaming it would not migrate anything - it would silently hand
+ * everyone a blank app and leave their real work orphaned under a key nothing
+ * reads. Changing it needs a migration that copies the old key first, and
+ * there is no reason to: it is invisible to users.
+ */
 export const STORAGE_KEY = "amos-career-path:progress:v1";
 
 export const initialState: ProgressState = {

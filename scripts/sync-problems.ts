@@ -84,7 +84,7 @@ const quote = (value: string): string => JSON.stringify(value);
 
 const main = async (): Promise<void> => {
   const response = await fetch(SOURCE, {
-    headers: { "user-agent": "amos-career-path-problem-sync/1.0" },
+    headers: { "user-agent": "career-compass-problem-sync/1.0" },
   });
   if (!response.ok) {
     fail(`${SOURCE} returned ${response.status}`);

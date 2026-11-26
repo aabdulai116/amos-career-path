@@ -1,4 +1,4 @@
-# Amos Career Path
+# CareerCompass
 
 One place to get technically ready for **summer 2028 internship recruiting**,
 which opens around **1 August 2027** — software engineering, AI, and the three

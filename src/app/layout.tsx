@@ -40,18 +40,18 @@ const description =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Amos Career Path",
-    template: "%s · Amos Career Path",
+    default: "CareerCompass",
+    template: "%s · CareerCompass",
   },
   description,
-  applicationName: "Amos Career Path",
+  applicationName: "CareerCompass",
   // Findable now, rather than hidden: the point of the intake and the course
   // tracker is that other students reach them.
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
     url: siteUrl,
-    siteName: "Amos Career Path",
+    siteName: "CareerCompass",
     title: "Get technically ready for internship recruiting",
     description,
   },

@@ -35,7 +35,7 @@ export function Nav() {
     <header className="flex h-14 shrink-0 items-center gap-3 overflow-hidden border-b border-[var(--border)] bg-[var(--surface)] px-4 sm:gap-6">
       <Link href="/" className="flex min-w-0 items-baseline gap-2">
         <span className="truncate text-sm font-semibold tracking-tight whitespace-nowrap">
-          Amos Career Path
+          CareerCompass
         </span>
         <span className="hidden font-mono text-[10px] whitespace-nowrap text-[var(--muted)] lg:inline">
           summer 2028
