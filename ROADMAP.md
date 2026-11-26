@@ -106,7 +106,7 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 - [x] Integration tests against Postgres in-process (PGlite), no services
 - [x] **GitHub Actions CI** — typecheck, lint, 463 TS tests, 46 Python tests,
       72 C++ assertions, build, and the link check on main
-- [ ] A CI badge in the README once the first run is green
+- [x] CI badge in the README (two green runs)
 - [ ] Tombstones, so a deletion on one device is not undone by a stale one
 
 ### Phase 11 — course practice and priorities, shipped
@@ -199,9 +199,11 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 
 ## Waiting on you
 - [ ] **Deploy to Vercel** — `npx vercel`, needs your login so it has to be you
-- [ ] **Register the OAuth apps** — Google Cloud Console and Microsoft Entra;
-      both need your accounts. See docs/SETUP.md
-- [ ] **Create the Neon database** and run `npx drizzle-kit migrate`
+- [x] **Google OAuth registered**, verified end to end: a real sign-in wrote
+      your account and progress to Neon
+- [–] **Microsoft Entra** — blocked by Microsoft, see docs/SETUP.md
+- [x] **Neon database created**, 13 tables migrated, zero drift against the
+      committed migrations
 - [ ] **Rewrite "why I built this" in the README** — my text is a marked placeholder
 
 ---
@@ -306,7 +308,7 @@ That is the diversity a recruiter sees before reading a word.
       so the structure itself shows the range
 - [x] README and screenshots extended for the practice page (Phase 10)
 - [x] GitHub Actions running every suite on push (Phase 13)
-- [ ] CI badge once the first run is green
+- [x] CI badge (added once runs went green)
 
 ---
 

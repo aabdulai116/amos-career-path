@@ -14,7 +14,9 @@ There is no backend.
 
 ```
 TypeScript · Python · C++ · PostgreSQL · WebAssembly
-516 TS tests · 46 Python tests · 72 C++ assertions
+522 TS tests · 46 Python tests · 72 C++ assertions
+
+[![CI](https://github.com/aabdulai116/career-compass/actions/workflows/ci.yml/badge.svg)](https://github.com/aabdulai116/career-compass/actions/workflows/ci.yml)
 ```
 
 ![The Atlas, filtered to the Quant Trader path](docs/screenshots/atlas.jpg)
@@ -252,7 +254,7 @@ inline confirm.
 | Engine | C++20 → WebAssembly via Emscripten and embind |
 | Python | Pyodide 314.0.8 (CPython 3.14 → WebAssembly), in a Web Worker |
 | State | Zustand, persisted to `localStorage` |
-| Tests | Vitest (516), `unittest` (46) and a dependency-free C++ runner (72 assertions) |
+| Tests | Vitest (522), `unittest` (46) and a dependency-free C++ runner (72 assertions) |
 | Auth | Auth.js v5 — Google, no passwords (Microsoft supported, see SETUP) |
 | Database | Neon Postgres with Drizzle ORM and committed migrations |
 | Deploy | Vercel |
@@ -323,7 +325,9 @@ Then open <http://localhost:3000>.
 | `npm run sync:problems` | Regenerate the NeetCode 150 from NeetCode's published data |
 | `npm run sync:internships` | Refetch and reclassify the internship listings |
 | `npm run test:worker` | The Python worker's tests |
+| `npm run db:generate` | Create a migration after a schema change |
 | `npm run db:migrate` | Apply migrations to the database |
+| `npm run db:verify` | Check the live schema has every table the app expects |
 | `npm run db:loadtest` | Measure sync cost against a throwaway database |
 | `npx drizzle-kit generate` | Create a migration after a schema change |
 | `npx drizzle-kit migrate` | Apply migrations to the database |
@@ -425,8 +429,9 @@ public/python/         the Pyodide worker
 public/data/           the generated internship listings (committed)
 drizzle/               committed SQL migrations
 src/
-  app/                 routes: / · /dashboard · /course · /practice · /internships
-                       · /orderbook · /settings · /account
+  app/                 routes: / · /start · /dashboard · /course · /practice
+                       · /internships · /opportunities · /orderbook
+                       · /settings · /account · /privacy
     api/               auth callbacks, sync, account deletion
   db/                  schema and the Neon connection
   server/              server-only data access, scoped to the session user

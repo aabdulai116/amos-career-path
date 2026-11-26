@@ -830,3 +830,45 @@ unlabelled checkboxes on the internships page. They are wrapped in `<label>`
 elements, which is valid implicit labelling; `input.labels` - the browser's
 own computation - returns "Hide roles needing citizenship" and "Open to a
 bachelor's". The detector was wrong, not the markup, and nothing was changed.
+
+## Phase 17 — pre-deployment audit
+
+A full pass over the repository before anyone else can reach it.
+
+**One real vulnerability, and it was mine.** `ws`, which I added so the Neon
+driver could hold a WebSocket, was on 8.18.3 — subject to two high-severity
+advisories: uninitialised memory disclosure and a memory-exhaustion denial of
+service. It sits in the production path, on the server, on every database
+call. Upgraded to 8.23.0; the audit is clean and the Neon connection still
+verifies. Worth noting the project had been at zero vulnerabilities, so this
+arrived with a dependency I chose and would have shipped unnoticed.
+
+**No schema drift.** The migrations declare 91 columns and Neon has exactly
+those 91, with nothing extra and nothing missing. That is the check worth
+running before a deploy, because a database that has quietly diverged from
+the committed migrations fails at runtime rather than at build time.
+
+**Tooling config left the repository.** `.claude/launch.json` was tracked. It
+is local editor configuration and belongs on a machine, not in a product repo
+— the same reason `.vscode/` and `.idea/` are conventionally ignored. Now
+untracked and gitignored, with the file still in place locally.
+
+**The README had drifted.** It claimed 516 tests against an actual 522, its
+route list predated four pages, and two npm scripts were undocumented. All
+corrected, and a CI badge added now that runs are green. "Why I built this"
+is still deliberately a placeholder: it is the one section that has to be in
+Amos's own words.
+
+**Clean on everything else**, checked rather than assumed: no TODO, FIXME or
+HACK anywhere; no `any` types in src; no stray console.log; no
+dangerouslySetInnerHTML; every `target="_blank"` carries `rel="noopener"`;
+every API route reads the user id from the session and never from the request
+body; all 62 external links resolve; and a production build serves all eleven
+pages with a correct 404 and no server errors.
+
+**Two reported problems that were not problems.** A dead-file scan flagged
+`src/db/index.ts`, which is imported everywhere as `@/db` — the scan did not
+understand directory indexes. And a content grep for AI-tool traces matched
+`resources.ts` and the internships data, which turned out to be a Karpathy
+video titled "Deep Dive into LLMs like ChatGPT" and 21 genuine job titles.
+Neither was changed.

@@ -44,3 +44,10 @@ next-env.d.ts
 
 # C++ engine build output (the wasm artifact IS committed; see DECISIONS.md)
 engine/build/
+
+# local editor and tooling config - belongs on a machine, not in the repo
+.claude/
+.vscode/
+.idea/
+*.swp
+.DS_Store
