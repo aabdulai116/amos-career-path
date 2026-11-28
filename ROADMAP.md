@@ -137,6 +137,37 @@ Last updated: 25 November 2026 · 50 commits · 235 TS tests + 72 C++ checks · 
 
 ## Next up
 
+### Hardening — Phase 18, shipped
+- [x] **The sync endpoint validates every record, not just the envelope.** It
+      used to shape-check the top level and pass `skills`, `course`, `problems`
+      and the rest straight through to typed Postgres columns. A day keyed
+      "abc" became `NaN` in an integer column, a `notes` of null hit a not-null
+      constraint, an `attempts` of "lots" failed its insert. Each was a 500.
+      Every field is now coerced to the type its column expects, and 18 tests
+      pin the cases that used to break.
+- [x] **Collections are bounded** (1,000 skills, 500 course days, 1,000
+      problems, and so on). Far above real use, and enough that one account
+      cannot fill a free-tier database. Over the cap the document is refused
+      rather than truncated, so nothing disappears unannounced.
+- [x] **Database failures return 503, not an unhandled 500.** Neon's free tier
+      sleeps and pools can be exhausted; the client now gets "keep your copy,
+      try again" instead of a stack trace it cannot distinguish from its own bug.
+- [x] **Security headers**: `frame-ancestors 'none'`, `X-Frame-Options`,
+      `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`.
+      Vercel already sent HSTS; the site was previously framable by anyone.
+- [x] **`sslmode=verify-full`** in the connection string, documented in
+      `.env.example`. Identical to `require` on pg 8, but pg 9 redefines
+      `require` to stop verifying the certificate. Production is unaffected
+      either way, since it uses the Neon WebSocket driver rather than `pg`.
+- [ ] **A full Content-Security-Policy.** Only `frame-ancestors` is set. A real
+      policy needs a nonce on Next's inline scripts and a source entry for the
+      Pyodide CDN the practice runner loads from. A half-written one that
+      breaks the Python runner would be worse than none, so it is its own job.
+- [ ] **Shared-state rate limiting.** The limiter is in memory, so on
+      serverless it is per instance: a guard against a runaway client, not an
+      attacker. Upstash or a Postgres table the day this is worth attacking.
+
+
 ### Internships — Phase 12, shipped
 - [x] Roles listed by category from the verified SimplifyJobs feed, newest first
 - [x] **A Python worker** (`worker/`, no dependencies) that fetches, classifies

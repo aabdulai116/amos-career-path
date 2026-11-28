@@ -18,6 +18,20 @@ import { parseProgressState } from "@/lib/progress-state";
 
 export const runtime = "nodejs";
 
+/**
+ * The database is the one thing here that can fail for reasons none of this
+ * code controls: Neon's free tier sleeps, a pool can be exhausted, a network
+ * can drop. Letting that propagate turns a transient outage into an unhandled
+ * 500 with a stack trace, and the client cannot tell it apart from a bug in
+ * the payload it just sent. 503 says "not now, keep your copy, try again",
+ * which is exactly what an offline-first client should do with it.
+ */
+const unavailable = (): NextResponse =>
+  NextResponse.json(
+    { error: "The database is unavailable. Your work is safe on this device." },
+    { status: 503, headers: { "retry-after": "30" } },
+  );
+
 export async function POST(request: Request): Promise<NextResponse> {
   const session = await auth();
   const userId = session?.user?.id;
@@ -52,17 +66,26 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   // The client's state goes through the same validator an imported file does.
-  // It arrives from a browser, so it is input, not data.
+  // It arrives from a browser, so it is input, not data. The validator coerces
+  // every field to the type its column expects, so nothing below can fail on
+  // a string where the schema wants an integer.
   const parsed = parseProgressState(body);
   if (!parsed.ok) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  const remote = await loadProgress(db, userId);
-  const merged = mergeProgress(parsed.state, remote);
-  await saveProgress(db, userId, merged);
-
-  return NextResponse.json({ state: merged, syncedAt: new Date().toISOString() });
+  try {
+    const remote = await loadProgress(db, userId);
+    const merged = mergeProgress(parsed.state, remote);
+    await saveProgress(db, userId, merged);
+    return NextResponse.json({
+      state: merged,
+      syncedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("sync: write failed", error);
+    return unavailable();
+  }
 }
 
 export async function GET(): Promise<NextResponse> {
@@ -78,5 +101,10 @@ export async function GET(): Promise<NextResponse> {
       { status: 503 },
     );
   }
-  return NextResponse.json({ state: await loadProgress(db, userId) });
+  try {
+    return NextResponse.json({ state: await loadProgress(db, userId) });
+  } catch (error) {
+    console.error("sync: read failed", error);
+    return unavailable();
+  }
 }
